@@ -15,4 +15,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\ResearchLink.Core\ResearchLink.Core.csproj" />
 	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="wwwroot\plugin\bootstrap\" />
+	</ItemGroup>
 </Project>

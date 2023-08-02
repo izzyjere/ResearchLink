@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResearchLink", "ResearchLink\ResearchLink.csproj", "{C745B60E-1388-4709-877E-2A74832E26EC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResearchLink", "ResearchLink\ResearchLink.csproj", "{C745B60E-1388-4709-877E-2A74832E26EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ResearchLink.Core", "ResearchLink.Core\ResearchLink.Core.csproj", "{036478C7-B2AD-43BE-95AF-9ED8F13A8092}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ResearchLink.Core", "ResearchLink.Core\ResearchLink.Core.csproj", "{036478C7-B2AD-43BE-95AF-9ED8F13A8092}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

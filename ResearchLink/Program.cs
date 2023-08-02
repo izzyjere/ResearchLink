@@ -1,14 +1,14 @@
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
-
-using ResearchLink.Data;
-
 var builder = WebApplication.CreateBuilder(args);
-
+var connectionString = builder.Configuration.GetConnectionString("Default");
 // Add services to the container.
+builder.Services.AddResearchLinkCore(connectionString)
+builder.Services.AddSimpleAuthentication(options =>
+{
+    options.UseSqlServer(connectionString);
+});
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
-builder.Services.AddSingleton<WeatherForecastService>();
+builder.Services.AddScoped<AuthenticationStateProvider,ServerAuthenticationStateProvider>();
 
 var app = builder.Build();
 

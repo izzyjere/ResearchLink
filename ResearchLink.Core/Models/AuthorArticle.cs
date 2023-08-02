@@ -6,4 +6,5 @@ public class AuthorArticle : Entity
     public Guid ArticleId { get; set; }
     public virtual Article Article { get; set; }
     public virtual Author Author { get; set; }
+    public int Order { get; set; }
 }

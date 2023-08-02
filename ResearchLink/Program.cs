@@ -1,7 +1,7 @@
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("Default");
 // Add services to the container.
-builder.Services.AddResearchLinkCore(connectionString)
+builder.Services.AddResearchLinkCore(connectionString);
 builder.Services.AddSimpleAuthentication(options =>
 {
     options.UseSqlServer(connectionString);
@@ -25,7 +25,9 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseSimpleAuthentication();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 

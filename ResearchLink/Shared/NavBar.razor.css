@@ -10,3 +10,16 @@
         color: #fff;
         height : fit-content
     }
+/* Custom CSS for user profile in navbar */
+.user-profile {
+    display: flex;
+    align-items: center;
+    margin-right: auto;
+}
+
+    .user-profile img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }

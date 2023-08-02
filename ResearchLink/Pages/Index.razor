@@ -1,8 +1,58 @@
 ﻿@page "/"
 
 <PageTitle>Index</PageTitle>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <form class="input-group">
+                <input type="text" class="form-control" placeholder="Search for papers...">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="row g-0">
+                    <div class="col-md-4">
+                        <img src="https://picsum.photos/200/300" alt="Paper Image" class="img-fluid">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h5 class="card-title">Research Paper Title 1</h5>
+                            <p class="card-text">Authors: John Doe, Jane Smith</p>
+                            <p class="card-text">Published in: Journal of XYZ</p>
+                            <p class="card-text">Abstract: Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+                            <a href="#" class="btn btn-primary"><i class="fas fa-file-alt"></i> Cite in BibTeX</a>
+                            <a href="#" class="btn btn-danger"><i class="fas fa-download"></i> Download PDF</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<h1>Hello, world!</h1>
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="row g-0">
+                    <div class="col-md-4">
+                        <img src="https://picsum.photos/200/300" a alt="Paper Image" class="img-fluid">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h5 class="card-title">Research Paper Title 2</h5>
+                            <p class="card-text">Authors: Alice Johnson, Bob Williams</p>
+                            <p class="card-text">Published in: Proceedings of ABC Conference</p>
+                            <p class="card-text">Abstract: Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...</p>
+                            <a href="#" class="btn btn-primary"><i class="fas fa-file-alt"></i> Cite in BibTeX</a>
+                            <a href="#" class="btn btn-danger"><i class="fas fa-download"></i> Download PDF</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-Welcome to your new app.
-
+        <!-- Add more col-md-6 divs for more research papers -->
+    </div>
+</div>

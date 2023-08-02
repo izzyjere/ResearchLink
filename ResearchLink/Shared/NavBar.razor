@@ -1,27 +1,27 @@
-﻿<nav class="navbar navbar-expand-lg bg-body-tertiary px-5">
+﻿<nav class="navbar navbar-expand-lg bg-body-tertiary px-5 fixed-top">
     <div class="container-fluid">
-        <a class="navbar-brand" href="#">Reasearch Link</a>
+        <a class="navbar-brand" href="#">ResearchLink</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    <NavLink class="nav-link" aria-current="page" ActiveClass="active" href="/">Home</NavLink>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Link</a>
+                    <NavLink class="nav-link" href="people">People</NavLink>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <NavLink class="nav-link dropdown-toggle" href="publications" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Publications
-                    </a>
+                    </NavLink>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Books</a></li>
-                        <li><a class="dropdown-item" href="#">Journal Articles</a></li>
-                        <li><a class="dropdown-item" href="#">Conference & Talks</a></li>                       
+                        <li><NavLink class="dropdown-item" href="#">Books</NavLink></li>
+                        <li><NavLink class="dropdown-item" href="#">Journal Articles</NavLink></li>
+                        <li><NavLink class="dropdown-item" href="#">Conference & Talks</NavLink></li>                       
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#">Submit a paper</a></li>
+                        <li><NavLink class="dropdown-item" href="#">Submit a paper</NavLink></li>
                     </ul>
                 </li>                
             </ul>

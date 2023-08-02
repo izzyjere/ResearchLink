@@ -1,6 +1,6 @@
 ﻿namespace ResearchLink.Core.Models;
 
-public class Organization : Entity
+public class Publisher : Entity
 {
     public string Name { get; set; }
     public string City { get; set; }

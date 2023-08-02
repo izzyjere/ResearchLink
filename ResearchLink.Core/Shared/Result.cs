@@ -4,17 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ResearchLink.Core.Shared
+namespace ResearchLink.Core.Shared;
+
+public record Result(bool Succeded,string Message)
 {
-    public record Result(bool Succeded,string Message)
+    public static Result Success(string message = "")
     {
-        public static Result Success(string message = "")
-        {
-            return new Result(true, message);
-        }
-        public static Result Failure(string messsage)
-        {
-            return new Result(false, messsage);
-        }
+        return new Result(true, message);
+    }
+    public static Result Failure(string messsage)
+    {
+        return new Result(false, messsage);
     }
 }

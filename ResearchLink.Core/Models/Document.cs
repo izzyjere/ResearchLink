@@ -1,7 +1,6 @@
 ﻿
-namespace ResearchLink.Core.Models
+namespace ResearchLink.Core.Models;
+
+public class Document : Entity
 {
-    public class Document : Entity
-    {
-    }
 }

@@ -10,12 +10,13 @@
                     <DataAnnotationsValidator />
                     <div class="form-group mb-3">
                         <label for="title">Title:</label>
-                        <InputSelect @bind-Value="@Model.Title" type="text" class="form-control" id="title" name="title">
-                            <option value="Mr">Mr.</option>
-                            <option value="Mrs">Mrs.</option>
-                            <option value="Ms">Ms.</option>
-                            <option value="Dr">Dr.</option>
-                            <option value="Prof">Prof.</option>
+                        <InputSelect @bind-Value="@Model.Title" TValue="string" class="form-control" id="title" name="title">
+                            <option value=''>Select title</option> 
+                            <option value='@("Mr")'>Mr.</option>
+                            <option value='@("Mrs")'>Mrs.</option>
+                            <option value='@("Ms")'>Ms.</option>
+                            <option value='@("Dr")'>Dr.</option>
+                            <option value='@("Prof")'>Prof.</option>
                         </InputSelect>
                         <ValidationMessage For="()=>Model.Title" />
                     </div>
@@ -23,6 +24,11 @@
                         <label for="email">Email:</label>
                         <InputText @bind-Value="Model.Email" type="email" class="form-control" id="email" name="email" />
                         <ValidationMessage For="()=>Model.Email" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="phone">Phone:</label>
+                        <InputText @bind-Value="Model.Phone" type="text" class="form-control" id="phone" name="phone" />
+                        <ValidationMessage For="()=>Model.Phone" />
                     </div>
                     <div class="form-group mb-3">
                         <label for="firstname">First Name:</label>
@@ -45,7 +51,7 @@
                                    name="confirmPassword" />
                         <ValidationMessage For="()=>Model.ConfirmPassword" />
                     </div>
-                    <button title="Create your account." type="submit" class="btn btn-primary mr-3"><i class="fas fa-user-plus mr-2"></i>Sign Up</button>
+                    <Button Type="ButtonType.Submit" Loading="@processing" title="Create your account." LoadingText="Creating your account.." Color="ButtonColor.Primary" class="mr-3"><i class="fas fa-user-plus mr-2"></i>Sign Up</Button>
                     <a title="Already have an account? Login." href="/login" class="btn btn-success">Login</a>
                 </EditForm>
 
@@ -66,10 +72,12 @@
     </div>
 </div>
 @code {
-    CreateAccountModel Model = new() { UserName = "system"};
+    CreateAccountModel Model = new() { UserName = "system" };
+    bool processing;
     public class CreateAccountModel : RegisterModel
     {
-        public string Title { get; set; }       
+        [Required]
+        public string Title { get; set; }
         [Required]
         public new string FirstName { get; set; }
         [Required]
@@ -81,20 +89,32 @@
         }
     }
     async Task Submit()
-    {  
+    {
+        processing = true;
         Model.IncludeProfile = true;
         Model.UserName = Model.Email;
         Model.SetBaseFields();
         var registerResult = await userService.CreateAsync(Model);
         if (registerResult.Succeeded)
         {
-            Model = new();
-            Navigation.NavigateTo("login", true);
+            var user = await userService.GetByUserNameAsync(Model.UserName);
+            if (user != null)
+            {
+                var newAuthor = user.CreateAuthorFromUser();
+                newAuthor.Title = Model.Title;
+                newAuthor.Biography = "Hi there! I am on Research Link.";
+                authorService.Save(newAuthor);                
+                Model = new();
+                processing = false;
+                Navigation.NavigateTo("login", true);
+            }
+            
         }
         else
         {
+            processing = false;
             await javaScriptRuntime.InvokeVoidAsync("showErrorMessage", registerResult.Message);
         }
-
+        
     }
 }

@@ -40,7 +40,7 @@
                                 <span>Loading..</span>
                             }
                             <ul class="dropdown-menu">
-                                <li><NavLink class="dropdown-item" href="#">Profile</NavLink></li>
+                                <li><a class="dropdown-item" @onclick='()=>Navigation.NavigateTo("profile",true)' href="">Profile</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" @onclick='()=>Navigation.NavigateTo("logout",true)' href="">Logout</a></li>
                             </ul>
@@ -58,9 +58,6 @@
 </nav>
 
 @code {
-    UserProxy? CurrentUser { get; set; }
-    protected override async Task OnInitializedAsync()
-    {
-        CurrentUser = await userService.GetCurrentUserAsync();
-    }
+    [CascadingParameter]
+    UserProxy? CurrentUser { get; set; }   
 }

@@ -10,11 +10,15 @@
 @using Microsoft.JSInterop
 @using ResearchLink
 @using ResearchLink.Shared
+@using ResearchLink.Core.Models
+@using ResearchLink.Core.Services
 @using SimpleAuthentication
-
+@using BlazorBootstrap
 @inject IJSRuntime javaScriptRuntime
 @inject NavigationManager Navigation
 
 @inject IAuthenticationService authenticationService
 @inject IUserService userService
 @inject IRoleService roleService
+
+@inject IAuthorService authorService

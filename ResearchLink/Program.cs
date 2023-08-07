@@ -8,6 +8,7 @@ builder.Services.AddSimpleAuthentication(options =>
 });
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddBlazorBootstrap();
 builder.Services.AddScoped<AuthenticationStateProvider,ServerAuthenticationStateProvider>();
 
 var app = builder.Build();

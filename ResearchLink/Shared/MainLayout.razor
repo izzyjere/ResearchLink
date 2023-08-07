@@ -1,12 +1,21 @@
 ﻿@inherits LayoutComponentBase
 <PageTitle>Reasearch Social  Network</PageTitle>
-<div class="page">
-    <header>
-        <NavBar />
-    </header>
-    <main class="container-fluid px-5 pt-5">
-        @Body
-    </main>
-</div>
+<CascadingValue TValue="UserProxy" Value="@CurrentUser">
+    <div class="page">
+        <header>
+            <NavBar />
+        </header>
+        <main class="container-fluid px-5 pt-5">
+            @Body
+        </main>
+    </div>
+</CascadingValue>
 
 
+@code {
+    public UserProxy? CurrentUser { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentUser = await userService.GetCurrentUserAsync();
+    }
+}

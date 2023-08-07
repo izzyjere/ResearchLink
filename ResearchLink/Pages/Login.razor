@@ -18,7 +18,7 @@
                         <InputText @bind-Value="Model.Password" type="password" class="form-control" id="password" name="password" />
                         <ValidationMessage For="()=>Model.Password" />
                     </div>
-                    <button title="Login now." type="submit" class="btn btn-primary">Login</button>
+                    <Button LoadingText="Signing You In.." title="Login now." Type="ButtonType.Submit" Loading="@loading" Color="ButtonColor.Primary">Login</Button>
                     <a href="signup" title="Don't have an account yet? Register."
                        class="btn btn-success mx-4">Register</a>
                 </EditForm>
@@ -40,19 +40,25 @@
 </div>
 @code{
     LoginRequest Model = new(); 
+    [Parameter]
     [SupplyParameterFromQuery(Name ="next")]
-    public string ReturnUrl { get; set; }
+    public string? Next { get; set; }
+    bool loading;
     async Task SignIn()
     {
-        Model.ReturnUrl = ReturnUrl ?? "/";
+        loading = true;
+        Model.ReturnUrl =  string.IsNullOrEmpty(Next)? "/" : Next;
         var loginResult = await authenticationService.LoginAsync(Model);
         if (loginResult.Succeeded)
         {   
             Navigation.NavigateTo($"login?key={loginResult.Key}", true);
         }
         else
-        {
+        { 
+            loading = false;
             await javaScriptRuntime.InvokeVoidAsync("showErrorMessage", loginResult.Message);
+           
         }
+       
     }
 }

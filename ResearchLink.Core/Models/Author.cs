@@ -12,4 +12,5 @@ public class Author : Entity
     public DateTime DateJoined { get; set; }
     public List<AuthorArticle> Articles { get; set; }
     public Guid UserId { get; set; }
+    public string? Affliation { get; set; }
 }

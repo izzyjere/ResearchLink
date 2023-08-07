@@ -13,4 +13,5 @@ public class Author : Entity
     public List<AuthorArticle> Articles { get; set; }
     public Guid UserId { get; set; }
     public string? Affliation { get; set; }
+    public string? Avatar { get; set; }
 }

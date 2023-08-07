@@ -12,10 +12,12 @@
 @using ResearchLink.Shared
 @using ResearchLink.Core.Models
 @using ResearchLink.Core.Services
+@using ResearchLink.Core.Misc
 @using SimpleAuthentication
 @using BlazorBootstrap
 @inject IJSRuntime javaScriptRuntime
 @inject NavigationManager Navigation
+@inject IFileSystemHelper fileSystemHelper
 
 @inject IAuthenticationService authenticationService
 @inject IUserService userService

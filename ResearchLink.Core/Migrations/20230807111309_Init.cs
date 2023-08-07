@@ -20,15 +20,31 @@ namespace ResearchLink.Core.Migrations
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Initials = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Biography = table.Column<string>(type: "nvarchar(max)", maxLength: 10000, nullable: false),
                     EmailAddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DateJoined = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Author", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Journal",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Journal", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -50,14 +66,40 @@ namespace ResearchLink.Core.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Volume",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    JournalId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Year = table.Column<int>(type: "int", nullable: false),
+                    Number = table.Column<int>(type: "int", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Volume", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Volume_Journal_JournalId",
+                        column: x => x.JournalId,
+                        principalTable: "Journal",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Article",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", maxLength: 10000, nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", maxLength: 10000, nullable: false),
                     PublisherId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DatePublished = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Pages = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VolumeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
@@ -70,6 +112,12 @@ namespace ResearchLink.Core.Migrations
                         principalTable: "Publisher",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Article_Volume_VolumeId",
+                        column: x => x.VolumeId,
+                        principalTable: "Volume",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -79,6 +127,7 @@ namespace ResearchLink.Core.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AuthorId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ArticleId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Order = table.Column<int>(type: "int", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
@@ -156,6 +205,11 @@ namespace ResearchLink.Core.Migrations
                 column: "PublisherId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Article_VolumeId",
+                table: "Article",
+                column: "VolumeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AuthorArticle_ArticleId",
                 table: "AuthorArticle",
                 column: "ArticleId");
@@ -179,6 +233,11 @@ namespace ResearchLink.Core.Migrations
                 name: "IX_Document_ArticleId",
                 table: "Document",
                 column: "ArticleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Volume_JournalId",
+                table: "Volume",
+                column: "JournalId");
         }
 
         /// <inheritdoc />
@@ -201,6 +260,12 @@ namespace ResearchLink.Core.Migrations
 
             migrationBuilder.DropTable(
                 name: "Publisher");
+
+            migrationBuilder.DropTable(
+                name: "Volume");
+
+            migrationBuilder.DropTable(
+                name: "Journal");
         }
     }
 }

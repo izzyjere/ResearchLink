@@ -12,8 +12,8 @@ using ResearchLink.Core.DataAccess;
 namespace ResearchLink.Core.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20230802113644_Init2")]
-    partial class Init2
+    [Migration("20230807111309_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -115,6 +115,9 @@ namespace ResearchLink.Core.Migrations
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 

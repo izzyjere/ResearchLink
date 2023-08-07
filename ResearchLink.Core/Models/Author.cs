@@ -11,5 +11,5 @@ public class Author : Entity
     public string EmailAddress { get; set; }
     public DateTime DateJoined { get; set; }
     public List<AuthorArticle> Articles { get; set; }
-
+    public Guid UserId { get; set; }
 }

@@ -18,4 +18,5 @@ public static class Extensions
            UserId = Guid.Parse(user.Id)
         };
     }
+    public static Guid GetUserId(this ClaimsPrincipal claimsPrincipal) => Guid.Parse(claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier));
 }

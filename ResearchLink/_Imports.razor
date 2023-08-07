@@ -1,4 +1,6 @@
-﻿@using System.Net.Http
+﻿@using System
+@using System.ComponentModel.DataAnnotations
+@using System.Net.Http
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Forms
@@ -8,3 +10,11 @@
 @using Microsoft.JSInterop
 @using ResearchLink
 @using ResearchLink.Shared
+@using SimpleAuthentication
+
+@inject IJSRuntime javaScriptRuntime
+@inject NavigationManager Navigation
+
+@inject IAuthenticationService authenticationService
+@inject IUserService userService
+@inject IRoleService roleService

@@ -1,0 +1,58 @@
+﻿@page "/login"
+<div class="container center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="text-primary">Login</h4>
+            </div>
+            <div class="card-body">
+                <EditForm Model="@Model" OnValidSubmit="SignIn" id="loginForm">
+                    <DataAnnotationsValidator/>
+                    <div class="form-group mb-3">
+                        <label for="username">Username:</label>
+                        <InputText @bind-Value="Model.UserName" type="email" class="form-control" id="username" name="username" />
+                        <ValidationMessage For="()=>Model.UserName"/>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label for="password">Password:</label>
+                        <InputText @bind-Value="Model.Password" type="password" class="form-control" id="password" name="password" />
+                        <ValidationMessage For="()=>Model.Password" />
+                    </div>
+                    <button title="Login now." type="submit" class="btn btn-primary">Login</button>
+                    <a href="signup" title="Don't have an account yet? Register."
+                       class="btn btn-success mx-4">Register</a>
+                </EditForm>
+                <div id="e-message" class="mt-4 d-none pa-2">
+                    <div class="alert alert-danger">
+                        <div class="d-flex align-items-center">
+                            <div>
+                                <i id="e-icon" class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="ml-4 mt-3">
+                                <p id="e-message-content"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@code{
+    LoginRequest Model = new(); 
+    [SupplyParameterFromQuery(Name ="next")]
+    public string ReturnUrl { get; set; }
+    async Task SignIn()
+    {
+        Model.ReturnUrl = ReturnUrl ?? "/";
+        var loginResult = await authenticationService.LoginAsync(Model);
+        if (loginResult.Succeeded)
+        {   
+            Navigation.NavigateTo($"login?key={loginResult.Key}", true);
+        }
+        else
+        {
+            await javaScriptRuntime.InvokeVoidAsync("showErrorMessage", loginResult.Message);
+        }
+    }
+}

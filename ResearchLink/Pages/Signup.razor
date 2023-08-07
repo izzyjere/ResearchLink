@@ -1,0 +1,100 @@
+﻿@page "/signup"
+<div class="container center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="text-primary">Create a new account</h4>
+            </div>
+            <div class="card-body">
+                <EditForm Model="@Model" OnValidSubmit="Submit" id="signupForm">
+                    <DataAnnotationsValidator />
+                    <div class="form-group mb-3">
+                        <label for="title">Title:</label>
+                        <InputSelect @bind-Value="@Model.Title" type="text" class="form-control" id="title" name="title">
+                            <option value="Mr">Mr.</option>
+                            <option value="Mrs">Mrs.</option>
+                            <option value="Ms">Ms.</option>
+                            <option value="Dr">Dr.</option>
+                            <option value="Prof">Prof.</option>
+                        </InputSelect>
+                        <ValidationMessage For="()=>Model.Title" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="email">Email:</label>
+                        <InputText @bind-Value="Model.Email" type="email" class="form-control" id="email" name="email" />
+                        <ValidationMessage For="()=>Model.Email" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="firstname">First Name:</label>
+                        <InputText @bind-Value="Model.FirstName" type="text" class="form-control" id="firstname" name="firstname" />
+                        <ValidationMessage For="()=>Model.FirstName" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="lastname">Last Name:</label>
+                        <InputText @bind-Value="Model.LastName" type="text" class="form-control" id="lastname" name="lastname" />
+                        <ValidationMessage For="()=>Model.LastName" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label for="password">Password:</label>
+                        <InputText @bind-Value="Model.Password" type="password" class="form-control" id="password" name="password" />
+                        <ValidationMessage For="()=>Model.Password" />
+                    </div>
+                    <div class="form-group mb-4">
+                        <label for="confirmPassword">Confirm Password:</label>
+                        <InputText @bind-Value="Model.ConfirmPassword" type="password" class="form-control" id="confirmPassword"
+                                   name="confirmPassword" />
+                        <ValidationMessage For="()=>Model.ConfirmPassword" />
+                    </div>
+                    <button title="Create your account." type="submit" class="btn btn-primary mr-3"><i class="fas fa-user-plus mr-2"></i>Sign Up</button>
+                    <a title="Already have an account? Login." href="/login" class="btn btn-success">Login</a>
+                </EditForm>
+
+            </div>
+        </div>
+        <div id="e-message" class="mt-4 d-none pa-2">
+            <div class="alert alert-danger">
+                <div class="d-flex align-items-center">
+                    <div>
+                        <i id="e-icon" class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="ml-4 mt-3">
+                        <p id="e-message-content"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+    CreateAccountModel Model = new() { UserName = "system"};
+    public class CreateAccountModel : RegisterModel
+    {
+        public string Title { get; set; }       
+        [Required]
+        public new string FirstName { get; set; }
+        [Required]
+        public new string LastName { get; set; }
+        public void SetBaseFields()
+        {
+            base.FirstName = this.FirstName;
+            base.LastName = this.LastName;
+        }
+    }
+    async Task Submit()
+    {  
+        Model.IncludeProfile = true;
+        Model.UserName = Model.Email;
+        Model.SetBaseFields();
+        var registerResult = await userService.CreateAsync(Model);
+        if (registerResult.Succeeded)
+        {
+            Model = new();
+            Navigation.NavigateTo("login", true);
+        }
+        else
+        {
+            await javaScriptRuntime.InvokeVoidAsync("showErrorMessage", registerResult.Message);
+        }
+
+    }
+}

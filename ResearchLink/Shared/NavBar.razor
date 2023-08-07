@@ -42,7 +42,7 @@
                             <ul class="dropdown-menu">
                                 <li><NavLink class="dropdown-item" href="#">Profile</NavLink></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><NavLink class="dropdown-item" href="logout">Logout</NavLink></li>
+                                <li><a class="dropdown-item" @onclick='()=>Navigation.NavigateTo("logout",true)' href="">Logout</a></li>
                             </ul>
                         </div>
                     </Authorized>

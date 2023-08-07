@@ -2,7 +2,7 @@
 <div class="container mt-5">
     @if (Model != null)
     {
-        <h3>@Model.FirstName @Model.LastName</h3>
+        <h3>@(Model.Title). @Model.FirstName @Model.LastName</h3>
         <div class="row mt-3">
             <div class="col-xs-12 col-md-6">
                 <img style="object-fit: cover !important;" height="480" width="480" src='@(Model.HasAvatar?fileSystemHelper.ReadAsBlob(Model.Avatar):"https://via.placeholder.com/480")' alt="Author Image" class="img-fluid">
@@ -32,16 +32,30 @@
                             </p>
                             <p class="card-text"><b>Member Since:</b> @Model.DateJoined.ToString("dd MMM, yyyy")</p>
                             <p class="card-text"><b>Email:</b> <a href="mailto:@(Model.EmailAddress)">@Model.EmailAddress</a> </p>
-                            <p class="card-text">
-                                <span style="font-size:large; margin-bottom:20px"><b>Biography:</b></span><br />
+                            <p style="text-align:justify" class="card-text">
+                                <span style="font-size:large;" class="mb-3"><b>Biography:</b></span><br />
+
                                 @if (mine)
                                 {
-                                    <InputTextArea required class="form-control mt-4 mb-3" maxlength="2000" rows="10" @bind-Value="@Model.Biography" />
-                                    <Button Color="ButtonColor.Primary" Loading="@saving" Type="ButtonType.Submit" LoadingText="Saving..">Save</Button>
+                                    @if (!editing)
+                                    {
+                                        @Model.Biography
+
+                                    <br />
+                                    <Button @onclick="()=>editing=true" title="Edit bio" Class="mt-4" Outline Style="margin-right:20px" Color="ButtonColor.Success"><i class="oi oi-pencil"></i></Button>
+                                    }
+                                    else
+                                    {
+                                        <InputTextArea required class="form-control mt-4 mb-3" maxlength="2000" rows="10" @bind-Value="@Model.Biography" />
+
+                                    }
+
+
+                                    <Button Class="mt-4" Color="ButtonColor.Primary" Loading="@saving" Type="ButtonType.Submit" LoadingText="Saving..">Save</Button>
                                 }
                                 else
                                 {
-                                    @Model.Biography
+                                    @Model.Biography <br/>
                                     <Button Class="mt-4" @onclick='()=>Navigation.NavigateTo($"/?author={Model.Id}",true)' Color="ButtonColor.Primary">View Publications</Button>
                                 }
 
@@ -66,7 +80,7 @@
     [CascadingParameter]
     Task<AuthenticationState> AuthenticationStateTask { get; set; }
     ClaimsPrincipal? CurrentUser { get; set; }
-    bool mine;
+    bool mine, editing;
     bool uploading;
     private async void OnUpload(InputFileChangeEventArgs eventArgs)
     {

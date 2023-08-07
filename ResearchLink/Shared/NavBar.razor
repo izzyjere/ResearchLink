@@ -69,8 +69,8 @@
         claimsPrincipal = (await authenticationStateTask).User;
         if (claimsPrincipal != null && claimsPrincipal.Identity.IsAuthenticated)
         {
-            var avatar = (await authorService.Table                                             
-                                             .FirstOrDefaultAsync(x => x.UserId==claimsPrincipal.GetUserId()));
+            var avatar = authorService.Table                                             
+                                             .FirstOrDefault(x => x.UserId==claimsPrincipal.GetUserId());
             if(avatar != null)
             {
                 if(avatar.HasAvatar)

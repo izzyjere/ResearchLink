@@ -22,7 +22,13 @@ public class DatabaseContext : DbContext
             .OnDelete(DeleteBehavior.Restrict);
         var entityTypes = typeof(Document).Assembly.GetTypes()
          .Where(t => typeof(IEntity).IsAssignableFrom(t) && t != typeof(IEntity) && !t.IsAbstract && !t.IsInterface && t!=typeof(Citation));
-
+        modelBuilder.Entity<Author>()
+           .OwnsOne(a => a.Avatar, av =>
+           {
+               av.ToTable("ProfileImages");
+               av.Property(p => p.Id);
+               av.WithOwner();
+           });
         foreach (var entityType in entityTypes)
         {
             var entity = modelBuilder.Entity(entityType);
@@ -33,5 +39,6 @@ public class DatabaseContext : DbContext
                 entity.Navigation(navigation.Name).AutoInclude();
             }
         }
+
     }
 }

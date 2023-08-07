@@ -1,7 +1,4 @@
 ﻿using ResearchLink.Core.Services.Impl;
-using ResearchLink.Core.Shared;
-
-using System.IO;
 
 namespace ResearchLink.Core.Misc
 {
@@ -38,8 +35,12 @@ namespace ResearchLink.Core.Misc
             {
                 Directory.CreateDirectory(root);
             }
-            var path = GetRandomFileStructure();
-            var filePath = Path.Combine(root, path);
+            var path = GetRandomFileStructure()+Guid.NewGuid().ToString().Substring(0, 8).Replace("-", "_") + ".rlink";
+            var filePath = Path.Combine(root + path);
+            if (!Directory.Exists(Path.GetDirectoryName(filePath)))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+            }
             FileStream fileStream = new(filePath, FileMode.Create, FileAccess.Write);
             memoryStream.WriteTo(fileStream);
             fileStream.Close();
@@ -55,12 +56,12 @@ namespace ResearchLink.Core.Misc
         {
             var random = new Random();
             var randomDepth = random.Next(1, 5);
-            var randomFolderName = "/";
+            var randomFolderName = "\\";
             for (int i = 0; i < randomDepth; i++)
             {
-                randomFolderName += $"{Guid.NewGuid().ToString().Substring(0, 8)}/";
+                randomFolderName += $"{Guid.NewGuid().ToString().Substring(0, 8)}\\";
             }
-            return randomFolderName + ".rlink";
+            return randomFolderName;
         }
     }
 }

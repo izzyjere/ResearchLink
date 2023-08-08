@@ -1,4 +1,6 @@
 ﻿@page "/people"
+@using System.Text.RegularExpressions
+
 <div class="container mt-5">
     <div class="row">
         @foreach (var author in Authors)
@@ -7,11 +9,25 @@
                 <div class="card mb-3">
                     <img style="object-fit:cover !important" height="320" width="480" src='@(author.HasAvatar?fileSystemHelper.ReadAsBlob(author.Avatar):"https://via.placeholder.com/200")' alt="Author Image" class="img-fluid">
                     <div class="card-body">
-                        <h5 class="card-title"><a href="profile?uid=@(author.UserId)">@author.FirstName @author.LastName</a> </h5>
+                        <h5 class="card-title">
+                            <a href="profile?uid=@(author.UserId)">
+                                @($"{author.FirstName} {author.LastName}")
+                            </a>
+                        </h5>
                         <p class="card-text">Affiliation: @author.Affliation</p>
-                        <p class="card-text">Email: @author.EmailAddress</p>
-                        <p class="card-text">Biography: 
-                            @author.Biography
+                        <p class="card-text">Email: <a href="mailto:@(author.EmailAddress)">@author.EmailAddress</a></p>
+                        <p class="card-text"><span style="font-size:large;margin-bottom:10px">Biography:</span><br/>
+                            @if (author.Biography.Length > 100)
+                            {
+                                <span class="@(author.ViewFullBiography?"d-none":"")">@GetBiographyPreview(author.Biography)</span>
+                                <span style="text-align:justify" class="@(author.ViewFullBiography?"":"d-none")">@author.Biography</span> 
+                                <button class="btn btn-primary mt-4" @onclick="() => ToggleBiography(author)">@(author.ViewFullBiography?"Collapse":"View More")</button>
+
+                            }
+                            else
+                            {
+                                @author.Biography
+                            }
                         </p>
                         <!-- Add any other author details here -->
                     </div>
@@ -20,6 +36,23 @@
         }
     </div>
 </div>
+
+@code {
+    
+    private string GetBiographyPreview(string biography)
+    {
+        const int maxPreviewLength = 100;
+        var strippedBiography = Regex.Replace(biography, "<.*?>", string.Empty); // Remove HTML tags, if any
+        return strippedBiography.Length > maxPreviewLength ? $"{strippedBiography.Substring(0, maxPreviewLength)}..." : strippedBiography;
+    }
+
+    private void ToggleBiography(Author author)
+    {
+        author.ViewFullBiography = !author.ViewFullBiography;
+        StateHasChanged();
+    }
+}
+
 @code {
     IEnumerable<Author> Authors = new List<Author>();
     protected override async Task OnInitializedAsync()

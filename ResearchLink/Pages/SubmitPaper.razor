@@ -1,0 +1,33 @@
+﻿@page "/submit"
+<div class="container mt-5">
+    <h3>Submit Paper</h3>
+</div>
+
+
+@code {
+    Article Model = new Article();
+    [CascadingParameter]
+    Task<AuthenticationState> AuthenticationStateTask { get; set; }
+    ClaimsPrincipal? claimsPrincipal { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        claimsPrincipal = (await AuthenticationStateTask).User;
+        if (claimsPrincipal !=null && claimsPrincipal.Identity.IsAuthenticated)
+        {
+            var author = await authorService.Table.FirstOrDefaultAsync(a => a.UserId == claimsPrincipal.GetUserId());
+            if (author != null)
+            {
+
+            }
+            else
+            {
+                Navigation.NavigateTo("/", true);
+            }
+        }
+        else
+        {
+            Navigation.NavigateTo("login?next=submit", true);
+        }
+
+    }
+}

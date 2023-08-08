@@ -1,0 +1,20 @@
+﻿<a class="@Class" href="@Href">@ChildContent</a>
+
+@code {
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+    [Parameter]
+    public string Href { get; set; }
+    [Parameter]
+    public string Class { get; set; }
+    [CascadingParameter]
+    Task<AuthenticationState> AuthenticationStateTask { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthenticationStateTask).User;
+        if (!user.Identity.IsAuthenticated)
+        {
+           Href=$"login?next={Href}";
+        }
+    }
+}

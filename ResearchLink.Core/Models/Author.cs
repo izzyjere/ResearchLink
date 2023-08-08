@@ -1,4 +1,6 @@
-﻿namespace ResearchLink.Core.Models;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace ResearchLink.Core.Models;
 
 public class Author : Entity
 {
@@ -15,4 +17,6 @@ public class Author : Entity
     public string? Affliation { get; set; }
     public FileModel? Avatar { get; set; }
     public bool HasAvatar => Avatar != null;
+    [NotMapped]
+    public bool ViewFullBiography { get; set; }
 }

@@ -13,8 +13,8 @@ public class Article  : Entity
     public ICollection<AuthorArticle> Authors { get; set; }
     public int Year => DatePublished.Year;
     public string Pages { get; set; }
-    public Guid VolumeId { get; set; }
-    public virtual  Volume Volume { get; set; }
+    public Guid? VolumeId { get; set; }
+    public virtual  Volume? Volume { get; set; }
     public ResearchType Type { get; set; }
 
 }

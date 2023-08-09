@@ -1,3 +1,5 @@
+using Hangfire;
+
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("Default");
 // Add services to the container.
@@ -9,6 +11,12 @@ builder.Services.AddSimpleAuthentication(options =>
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 builder.Services.AddBlazorBootstrap();
+builder.Services.AddHangfire(t =>
+{
+    t.UseSqlServerStorage(connectionString);
+});
+builder.Services.AddHangfireServer();
+builder.Services.AddHangfireServer();
 builder.Services.AddScoped<AuthenticationStateProvider,ServerAuthenticationStateProvider>();
 
 var app = builder.Build();
@@ -31,5 +39,6 @@ app.UseAuthorization();
 app.UseSimpleAuthentication();
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
-
+app.UseHangfireDashboard();
+app.InitFileStoreCleaner();
 app.Run();

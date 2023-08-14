@@ -25,6 +25,19 @@
                             <ValidationMessage For="()=>Model.Type"/>
                         </div>
                     </div>
+                    <div class="col-12 col-md-6">
+                        <div class="form-group">
+                            <label for="abstract">Abstract</label>
+                            <InputTextArea placeholder="type or paste your abstract here." rows="25" class="form-control" id="abstract" @bind-Value="@Model.Description"/>"
+                            <ValidationMessage For="()=>Model.Description"/>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="form-group">
+                            <label for="publisher">Publisher</label>
+                            <CascadingSelect @bind-Publisher="@Model.Publisher"></CascadingSelect>
+                        </div>
+                    </div>
                 </div>
             </div>
         </EditForm>
@@ -34,12 +47,13 @@
 
 
 @code {
-    Article Model = new Article();
+    Article Model = new Article { Publisher = new Publisher()};
     Author? currentAuthor;
     [CascadingParameter]
     Task<AuthenticationState> AuthenticationStateTask { get; set; }
     ClaimsPrincipal? claimsPrincipal { get; set; }
     IEnumerable<Journal> journals = new List<Journal>();
+    
     protected override async Task OnInitializedAsync()
     {
         claimsPrincipal = (await AuthenticationStateTask).User;

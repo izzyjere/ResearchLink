@@ -1,0 +1,53 @@
+﻿@if (createNewPublisher)
+{
+    <InputText @bind-Value="@PublisherName" class="form-control" />
+    <button class="btn btn-primary" @onclick="AddPublisher">Add Publisher</button>
+}
+else
+{
+    <InputSelect id="publisher" @bind-Value="@Publisher" class="form-control">
+        @foreach (var publisher in publishers)
+        {
+            <option value="@publisher">@publisher.Name</option>
+        }
+        <option disabled @onclick="()=> createNewPublisher =! createNewPublisher">New Publisher</option>
+    </InputSelect>
+}
+
+@code {
+    bool createNewPublisher;
+    [Parameter]
+    public EventCallback<Publisher> PublisherChanged { get; set; }
+    [Parameter]
+    public Publisher Publisher { get; set; }
+    IEnumerable<Publisher> publishers = new List<Publisher>();
+    string PublisherName { get; set; }
+    async void OnPublisherChanged(Publisher publisher)
+    {
+        await PublisherChanged.InvokeAsync(publisher);
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        await ReloadData();
+    }
+    async Task ReloadData()
+    {
+        publishers = await publisherService.Table.ToListAsync();
+    }
+    async Task AddPublisher()
+    {
+        if (string.IsNullOrWhiteSpace(PublisherName))
+        {
+            return;
+        }
+        if (!publishers.Any(p => p.Name.Equals(PublisherName, StringComparison.OrdinalIgnoreCase)))
+        {
+            var publisher = new Publisher { Name = PublisherName };
+            publisherService.Save(publisher);
+            await PublisherChanged.InvokeAsync(publisher);
+            PublisherName = string.Empty;
+            await ReloadData();
+        }
+
+    }
+}

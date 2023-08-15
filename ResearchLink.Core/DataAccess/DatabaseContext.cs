@@ -1,11 +1,12 @@
 ﻿namespace ResearchLink.Core.DataAccess;
 
-public class DatabaseContext : DbContext
+public class DatabaseContext : DbContext 
 {
     public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
     {
 
     }
+    //Configures the entity model.
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Citation>();

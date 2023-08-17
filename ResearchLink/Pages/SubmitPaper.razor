@@ -23,7 +23,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12 col-md-6">                           
+                        <div class="col-12 col-md-6">
                             <div class="col-12 mb-3">
                                 <div class="form-group">
                                     <label for="publisher">Publisher</label>
@@ -34,7 +34,7 @@
                                     }
                                     else
                                     {
-                                        <InputSelect id="publisher" TValue="Guid" ValueExpression="()=>Model.PublisherId" ValueChanged="OnPublisherChanged" class="form-control">
+                                        <InputSelect id="publisher" TValue="Guid" ValueExpression="()=>Model.PublisherId" ValueChanged="OnPublisherChanged" class="form-select">
                                             <option value="@Guid.Empty">Select publisher</option>
                                             @foreach (var publisher in publishers)
                                             {
@@ -48,7 +48,7 @@
                             <div class="col-12 mb-3">
                                 <div class="form-group">
                                     <label for="type">Research Type</label>
-                                    <InputSelect type="text" class="form-control" id="type" @bind-Value="@Model.Type">
+                                    <InputSelect type="text" class="form-select" id="type" @bind-Value="@Model.Type">
                                         @foreach (ResearchType item in Enum.GetValues(typeof(ResearchType)))
                                         {
                                             <option value="@item">@item.GetDescription()</option>
@@ -67,11 +67,10 @@
                                             <InputText placeholder="New journal name" id="journal" @bind-Value="@JournalName" class="form-control" />
                                             <InputText placeholder="New journal description" id="journalDescription" @bind-Value="@JournalDescription" class="form-control mt-2" />
                                             <Icon class="mt-2" Color="IconColor.Info" title="Add Volumes" Name="@IconName.WindowPlus" @onclick="AddJournalVolumes"></Icon>
-                                            <Icon class="mt-2" Color="IconColor.Success" title="Save" Name="@IconName.DatabaseAdd" @onclick="AddJournal"></Icon>
                                         }
                                         else
                                         {
-                                            <InputSelect id="journal" TValue="Guid" ValueExpression="()=>(journalGuid)" ValueChanged="OnJournalChanged" class="form-control">
+                                            <InputSelect id="journal" TValue="Guid" ValueExpression="()=>(journalGuid)" ValueChanged="OnJournalChanged" class="form-select">
                                                 <option value="@Guid.Empty">Select journal</option>
                                                 @foreach (var item in journals)
                                                 {
@@ -87,16 +86,42 @@
                                     <div class="col-12 mb-3">
                                         <div class="form-group">
                                             <label for="volume">Volume</label>
-                                            <InputSelect class="form-control" id="volume" @bind-Value="@Model.Volume">
+                                            <InputSelect class="form-select" id="volume" @bind-Value="@Model.VolumeId">
                                                 @foreach (var item in journalModel.Volumes)
                                                 {
-                                                    <option value="@item">@item.Number (@item.Year)</option>
+                                                    <option value="@item.Id">@item.Number (@item.Year)</option>
                                                 }
                                             </InputSelect>
                                         </div>
                                     </div>
                                 }
                             }
+                            <div col-12 mb-3>
+                                <div class="form-group">
+                                    <label for="authors">Author(s)</label>
+                                    <AutoComplete @bind-Value="@articleAuthor"
+                                                  ElementId="authors"
+                                                  DataProvider="AuthorsDataProvider"
+                                                  TItem="Author"
+                                                  StringComparison="StringComparison.OrdinalIgnoreCase"
+                                                  OnChanged="OnAuthorPicked"
+                                                  Placeholder="Type author name"
+                                                  PropertyName="FullName" />
+                                </div>
+                                <div class="mt-3">
+                                    <ol class="list-group list-group-numbered">
+                                        @foreach (var item in articleAuthors)
+                                        {
+                                            <li class="list-group-item d-flex justify-content-between align-items-start">
+                                                <div class="ms-2 me-auto">
+                                                    <div class="fw-bold">@(item.Title). @item.FirstName @item.LastName <span style="font-size:10px">(Joined @item.DateJoined.Humanize())</span></div>
+                                                    @item.Affliation <Icon Color="IconColor.Danger" @onclick="()=>articleAuthors.Remove(item)" title="remove this author" Name="IconName.Trash"/>
+                                                </div>                                                
+                                            </li>
+                                        }
+                                    </ol>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -107,33 +132,58 @@
 </div>
 <Modal @ref="volumesModal" Title="Configure Journal Volumes">
     <BodyTemplate>
-        <div class="row">
-            <div class="col-12 col-md-6 mb-3">
-                <div class="form-group">
-                    <label for="volumeMode">Volume Generation Mode</label>
-                    <select id="volumeMode" class="form-select">
-                        <option value="1">Auto</option>
-                        <option value="2">Manual</option>
-                    </select>
-                </div>                
-            </div>
-            <div class="col-12 col-md-6 mb-3">
-                <div class="form-group">
-                    <label for="volumeFrequency">Frequency</label>
-                    <select id="volumeFrequency" class="form-select">
-                        <option value="1">Annualy</option>
-                        <option value="2">Monthly</option>
-                        <option value="2">Semi Annual</option>
-                        <option value="2">Quaterly</option>
-                    </select>
+        <EditForm id="vConfigForm" OnValidSubmit="AddJournal" Model="@volumeGenerationConfiguration">
+            <DataAnnotationsValidator />
+            <div class="row">
+                <div class="col-12 col-md-6 mb-3">
+                    <div class="form-group">
+                        <label for="volumeMode">Volume Generation Mode</label>
+                        <InputSelect id="volumeMode" @bind-Value="@volumeGenerationConfiguration.Mode" class="form-select">
+                            @foreach (VolumeGenerationMode item in Enum.GetValues(typeof(VolumeGenerationMode)))
+                            {
+                                <option value="@item">@item.ToString()</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="()=>volumeGenerationConfiguration.Mode" />
+                    </div>
                 </div>
-            </div> 
-            
-        </div>
+                <div class="col-12 col-md-6 mb-3">
+                    <div class="form-group">
+                        <label for="volumeFrequency">Frequency</label>
+                        <InputSelect id="volumeFrequency" @bind-Value="@volumeGenerationConfiguration.Frequency" class="form-select">
+                            @foreach (VolumeGenerationFrequency item in Enum.GetValues(typeof(VolumeGenerationFrequency)))
+                            {
+                                <option value="@item">@item.GetDescription()</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="()=>volumeGenerationConfiguration.Frequency" />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 mb-3">
+                    <div class="form-group">
+                        <label for="startYear">Start Year</label>
+                        <InputNumber id="startYear" @bind-Value="@volumeGenerationConfiguration.StartYear" class="form-control"></InputNumber>
+                        <ValidationMessage For="()=>volumeGenerationConfiguration.StartYear" />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 mb-3">
+                    <div class="form-group">
+                        <label for="endYear">End Year (0 for endless)</label>
+                        <InputNumber id="endYear" @bind-Value="@volumeGenerationConfiguration.EndYear" class="form-control"></InputNumber>
+                        <ValidationMessage For="()=>volumeGenerationConfiguration.EndYear" />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 mb-3">
+                    <div class="form-group">
+                        <Switch @bind-Value="@volumeGenerationConfiguration.GenerateNow" Label="Generate volumes immediately" />
+                    </div>
+                </div>
+            </div>
+        </EditForm>
     </BodyTemplate>
     <FooterTemplate>
         <Button Color="ButtonColor.Secondary" @onclick="async ()=>await volumesModal.HideAsync()">Close</Button>
-        <Button Color="ButtonColor.Primary">Save changes</Button>
+        <Button form="vConfigForm" LoadingText="Saving.." Loading="@processing" Type="ButtonType.Submit" Color="ButtonColor.Primary">Save changes</Button>
     </FooterTemplate>
 </Modal>
 @code {
@@ -142,7 +192,15 @@
     [CascadingParameter]
     Task<AuthenticationState> AuthenticationStateTask { get; set; }
     ClaimsPrincipal? claimsPrincipal { get; set; }
+    List<Author> authors = new List<Author>();
+    List<Author> articleAuthors = new List<Author>();
+    string articleAuthor;
+    private async Task<AutoCompleteDataProviderResult<Author>> AuthorsDataProvider(AutoCompleteDataProviderRequest<Author> request)
+    {
 
+        authors = await authorService.Table.ToListAsync(); // call a service or an API to pull the authors
+        return await Task.FromResult(new AutoCompleteDataProviderResult<Author> { Data = authors, TotalCount=authors.Count });
+    }
     protected override async Task OnInitializedAsync()
     {
         claimsPrincipal = (await AuthenticationStateTask).User;
@@ -160,6 +218,15 @@
         }
 
     }
+    void OnAuthorPicked(Author author)
+    {
+        if(author is not null)
+        {
+            articleAuthors.Add(author);
+            articleAuthor = string.Empty;
+            StateHasChanged();
+        }
+    }
 }
 @code {
     bool createNewPublisher, createNewJournal;
@@ -172,6 +239,7 @@
     Journal? journalModel;
     Guid journalGuid { get => journalModel == null ? creatingGuid : journalModel.Id; }
     Modal volumesModal;
+    VolumeGenerationConfiguration volumeGenerationConfiguration = new();
     void OnPublisherChanged(Guid publisherId)
     {
 
@@ -209,8 +277,8 @@
         publishers = publisherService.Table.ToList();
         journals = journalService.Table.Include(j => j.Volumes).ToList();
     }
-
-    void AddJournal()
+    bool processing;
+    async void AddJournal()
     {
         if (string.IsNullOrWhiteSpace(JournalName) || string.IsNullOrWhiteSpace(JournalDescription))
         {
@@ -218,12 +286,19 @@
         }
         if (!journals.Any(j => j.Name.Equals(JournalName, StringComparison.OrdinalIgnoreCase)))
         {
-            var journal = new Journal { Name = JournalName, Description = JournalDescription };
+            processing = true;
+            var journal = new Journal { Name = JournalName, Description = JournalDescription, VolumeGenerationConfiguration = volumeGenerationConfiguration };
             journalService.Save(journal);
+            if (volumeGenerationConfiguration.GenerateNow)
+            {
+                await volumeGenerationConfigurationService.ExecuteAutomaticVolumeGenerationJob();
+            }
             journals = journalService.Table.Include(j => j.Volumes).ToList();
             journalModel = journals.FirstOrDefault(j => j.Name.Equals(JournalName, StringComparison.OrdinalIgnoreCase));
             JournalName = string.Empty;
             JournalDescription = string.Empty;
+            processing = false;
+            await volumesModal.HideAsync();
             StateHasChanged();
         }
     }
@@ -235,10 +310,10 @@
         }
         else
         {
-           await volumesModal.ShowAsync();
+            volumeGenerationConfiguration = new();
+            await volumesModal.ShowAsync();
         }
     }
-
     void AddPublisher()
     {
         if (string.IsNullOrWhiteSpace(PublisherName))

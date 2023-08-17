@@ -19,4 +19,5 @@ public class Author : Entity
     public bool HasAvatar => Avatar != null;
     [NotMapped]
     public bool ViewFullBiography { get; set; }
+    public string FullName => $"{Title}. {FirstName} {LastName}({Affliation??"No affliation"})";
 }

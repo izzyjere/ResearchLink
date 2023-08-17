@@ -5,6 +5,7 @@ using System;
 using Hangfire;
 using ResearchLink.Core.Misc;
 using System.ComponentModel;
+using ResearchLink.Core.Services;
 
 public static class Extensions
 {
@@ -17,6 +18,17 @@ public static class Extensions
             throw new Exception("Some services are missing: Name{IFileSystemHelper}");
         }
         RecurringJob.AddOrUpdate("FileStore_Cleaner", () => service.RunFileStoreCleanUp(), "*/5 * * * *");
+        return app;
+    } 
+    internal static IApplicationBuilder InitVolumeGenerator(this IApplicationBuilder app)
+    {
+        var scope = app.ApplicationServices.CreateScope();
+        var service = scope.ServiceProvider.GetService<IVolumeGenerationConfigurationService>();
+        if (service == null)
+        {
+            throw new Exception("Some services are missing: Name{IVolumeGenerationConfigurationService}");
+        }
+        RecurringJob.AddOrUpdate("Volume_Generator", () => service.ExecuteAutomaticVolumeGenerationJob(), "0 0 15 * *");
         return app;
     }
     public static Author CreateAuthorFromUser(this UserProxy user)

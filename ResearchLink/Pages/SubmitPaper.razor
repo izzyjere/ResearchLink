@@ -23,16 +23,14 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-12 col-md-6">
-                            <div class="col-12">
-                            </div>
-                            <div class="col-12">
+                        <div class="col-12 col-md-6">                           
+                            <div class="col-12 mb-3">
                                 <div class="form-group">
                                     <label for="publisher">Publisher</label>
                                     @if (createNewPublisher && Model.PublisherId == Guid.Empty)
                                     {
                                         <InputText placeholder="New publisher name" id="publisher" @bind-Value="@PublisherName" class="form-control" />
-                                        <Icon class="mt-2" Name="@IconName.DatabaseAdd" @onclick="AddPublisher"></Icon>
+                                        <Icon class="mt-2" Color="IconColor.Success" title="Save" Name="@IconName.DatabaseAdd" @onclick="AddPublisher"></Icon>
                                     }
                                     else
                                     {
@@ -47,7 +45,7 @@
                                     }
                                 </div>
                             </div>
-                            <div class="col-12">
+                            <div class="col-12 mb-3">
                                 <div class="form-group">
                                     <label for="type">Research Type</label>
                                     <InputSelect type="text" class="form-control" id="type" @bind-Value="@Model.Type">
@@ -61,31 +59,32 @@
                             </div>
                             @if (Model.Type == ResearchType.JournalArticle)
                             {
-                                <div class="col-12">
+                                <div class="col-12 mb-3">
                                     <div class="form-group">
                                         <label for="journal">Journal</label>
                                         @if (createNewJournal && journalModel == null)
                                         {
                                             <InputText placeholder="New journal name" id="journal" @bind-Value="@JournalName" class="form-control" />
                                             <InputText placeholder="New journal description" id="journalDescription" @bind-Value="@JournalDescription" class="form-control mt-2" />
-                                            <Icon class="mt-2" Name="@IconName.DatabaseAdd" @onclick="AddJournal"></Icon>
+                                            <Icon class="mt-2" Color="IconColor.Info" title="Add Volumes" Name="@IconName.WindowPlus" @onclick="AddJournalVolumes"></Icon>
+                                            <Icon class="mt-2" Color="IconColor.Success" title="Save" Name="@IconName.DatabaseAdd" @onclick="AddJournal"></Icon>
                                         }
                                         else
                                         {
-                                            <InputSelect id="journal" TValue="Guid" ValueExpression="()=>Model.PublisherId" ValueChanged="OnPublisherChanged" class="form-control">
-                                                <option value="@Guid.Empty">Select publisher</option>
-                                                @foreach (var publisher in publishers)
+                                            <InputSelect id="journal" TValue="Guid" ValueExpression="()=>(journalGuid)" ValueChanged="OnJournalChanged" class="form-control">
+                                                <option value="@Guid.Empty">Select journal</option>
+                                                @foreach (var item in journals)
                                                 {
-                                                    <option value="@publisher.Id">@publisher.Name</option>
+                                                    <option value="@item.Id">@item.Name</option>
                                                 }
-                                                <option class="text-info" value="@creatingGuid">Create new publisher</option>
+                                                <option class="text-info" value="@creatingGuid">Create new journal</option>
                                             </InputSelect>
                                         }
                                     </div>
                                 </div>
                                 if (journalModel != null)
                                 {
-                                    <div class="col-12">
+                                    <div class="col-12 mb-3">
                                         <div class="form-group">
                                             <label for="volume">Volume</label>
                                             <InputSelect class="form-control" id="volume" @bind-Value="@Model.Volume">
@@ -106,8 +105,37 @@
 
     </div>
 </div>
-
-
+<Modal @ref="volumesModal" Title="Configure Journal Volumes">
+    <BodyTemplate>
+        <div class="row">
+            <div class="col-12 col-md-6 mb-3">
+                <div class="form-group">
+                    <label for="volumeMode">Volume Generation Mode</label>
+                    <select id="volumeMode" class="form-select">
+                        <option value="1">Auto</option>
+                        <option value="2">Manual</option>
+                    </select>
+                </div>                
+            </div>
+            <div class="col-12 col-md-6 mb-3">
+                <div class="form-group">
+                    <label for="volumeFrequency">Frequency</label>
+                    <select id="volumeFrequency" class="form-select">
+                        <option value="1">Annualy</option>
+                        <option value="2">Monthly</option>
+                        <option value="2">Semi Annual</option>
+                        <option value="2">Quaterly</option>
+                    </select>
+                </div>
+            </div> 
+            
+        </div>
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Secondary" @onclick="async ()=>await volumesModal.HideAsync()">Close</Button>
+        <Button Color="ButtonColor.Primary">Save changes</Button>
+    </FooterTemplate>
+</Modal>
 @code {
     Article Model = new Article { Publisher = new Publisher() };
     Author? currentAuthor;
@@ -142,7 +170,8 @@
     string JournalName { get; set; }
     string JournalDescription { get; set; }
     Journal? journalModel;
-
+    Guid journalGuid { get => journalModel == null ? creatingGuid : journalModel.Id; }
+    Modal volumesModal;
     void OnPublisherChanged(Guid publisherId)
     {
 
@@ -196,6 +225,17 @@
             JournalName = string.Empty;
             JournalDescription = string.Empty;
             StateHasChanged();
+        }
+    }
+    async void AddJournalVolumes()
+    {
+        if (string.IsNullOrWhiteSpace(JournalName) || string.IsNullOrWhiteSpace(JournalDescription))
+        {
+            return;
+        }
+        else
+        {
+           await volumesModal.ShowAsync();
         }
     }
 

@@ -5,55 +5,116 @@
         <EditForm Model="@Model">
             <DataAnnotationsValidator />
             <div class="card col-md-6">
-                <div class="row card-body">                    
-                    <div class="col-12 col-md-6">
-                        <div class="form-group">
-                            <label for="title">Research Title</label>
-                            <InputText type="text" class="form-control" id="title" @bind-Value="@Model.Title"/>
-                            <ValidationMessage For="()=>Model.Title"/>
+                <div class="row card-body">
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="title">Research Title</label>
+                                    <InputText type="text" class="form-control" id="title" @bind-Value="@Model.Title" />
+                                    <ValidationMessage For="()=>Model.Title" />
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="abstract">Abstract</label>
+                                    <InputTextArea placeholder="type or paste your abstract here." rows="25" style="max-height:65vh" class="form-control" id="abstract" @bind-Value="@Model.Description" />
+                                    <ValidationMessage For="()=>Model.Description" />
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <div class="form-group">
-                            <label for="type">Research Type</label>
-                            <InputSelect type="text" class="form-control" id="type" @bind-Value="@Model.Type">
-                              @foreach (var item in Enum.GetValues(typeof(ResearchType)))
-                              {
-                                  <option value="@item">@item.ToString()</option>
-                              }
-                            </InputSelect>
-                            <ValidationMessage For="()=>Model.Type"/>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <div class="form-group">
-                            <label for="abstract">Abstract</label>
-                            <InputTextArea placeholder="type or paste your abstract here." rows="25" class="form-control" id="abstract" @bind-Value="@Model.Description"/>"
-                            <ValidationMessage For="()=>Model.Description"/>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <div class="form-group">
-                            <label for="publisher">Publisher</label>
-                            <CascadingSelect @bind-Publisher="@Model.Publisher"></CascadingSelect>
+                        <div class="col-12 col-md-6">
+                            <div class="col-12">
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="publisher">Publisher</label>
+                                    @if (createNewPublisher && Model.PublisherId == Guid.Empty)
+                                    {
+                                        <InputText placeholder="New publisher name" id="publisher" @bind-Value="@PublisherName" class="form-control" />
+                                        <Icon class="mt-2" Name="@IconName.DatabaseAdd" @onclick="AddPublisher"></Icon>
+                                    }
+                                    else
+                                    {
+                                        <InputSelect id="publisher" TValue="Guid" ValueExpression="()=>Model.PublisherId" ValueChanged="OnPublisherChanged" class="form-control">
+                                            <option value="@Guid.Empty">Select publisher</option>
+                                            @foreach (var publisher in publishers)
+                                            {
+                                                <option value="@publisher.Id">@publisher.Name</option>
+                                            }
+                                            <option class="text-info" value="@creatingGuid">Create new publisher</option>
+                                        </InputSelect>
+                                    }
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="type">Research Type</label>
+                                    <InputSelect type="text" class="form-control" id="type" @bind-Value="@Model.Type">
+                                        @foreach (ResearchType item in Enum.GetValues(typeof(ResearchType)))
+                                        {
+                                            <option value="@item">@item.GetDescription()</option>
+                                        }
+                                    </InputSelect>
+                                    <ValidationMessage For="()=>Model.Type" />
+                                </div>
+                            </div>
+                            @if (Model.Type == ResearchType.JournalArticle)
+                            {
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <label for="journal">Journal</label>
+                                        @if (createNewJournal && journalModel == null)
+                                        {
+                                            <InputText placeholder="New journal name" id="journal" @bind-Value="@JournalName" class="form-control" />
+                                            <InputText placeholder="New journal description" id="journalDescription" @bind-Value="@JournalDescription" class="form-control mt-2" />
+                                            <Icon class="mt-2" Name="@IconName.DatabaseAdd" @onclick="AddJournal"></Icon>
+                                        }
+                                        else
+                                        {
+                                            <InputSelect id="journal" TValue="Guid" ValueExpression="()=>Model.PublisherId" ValueChanged="OnPublisherChanged" class="form-control">
+                                                <option value="@Guid.Empty">Select publisher</option>
+                                                @foreach (var publisher in publishers)
+                                                {
+                                                    <option value="@publisher.Id">@publisher.Name</option>
+                                                }
+                                                <option class="text-info" value="@creatingGuid">Create new publisher</option>
+                                            </InputSelect>
+                                        }
+                                    </div>
+                                </div>
+                                if (journalModel != null)
+                                {
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <label for="volume">Volume</label>
+                                            <InputSelect class="form-control" id="volume" @bind-Value="@Model.Volume">
+                                                @foreach (var item in journalModel.Volumes)
+                                                {
+                                                    <option value="@item">@item.Number (@item.Year)</option>
+                                                }
+                                            </InputSelect>
+                                        </div>
+                                    </div>
+                                }
+                            }
                         </div>
                     </div>
                 </div>
             </div>
         </EditForm>
-       
+
     </div>
 </div>
 
 
 @code {
-    Article Model = new Article { Publisher = new Publisher()};
+    Article Model = new Article { Publisher = new Publisher() };
     Author? currentAuthor;
     [CascadingParameter]
     Task<AuthenticationState> AuthenticationStateTask { get; set; }
     ClaimsPrincipal? claimsPrincipal { get; set; }
-    IEnumerable<Journal> journals = new List<Journal>();
-    
+
     protected override async Task OnInitializedAsync()
     {
         claimsPrincipal = (await AuthenticationStateTask).User;
@@ -68,6 +129,90 @@
         else
         {
             Navigation.NavigateTo("login?next=submit", true);
+        }
+
+    }
+}
+@code {
+    bool createNewPublisher, createNewJournal;
+    IEnumerable<Publisher> publishers = new List<Publisher>();
+    IEnumerable<Journal> journals = new List<Journal>();
+    Guid creatingGuid = Guid.NewGuid();
+    string PublisherName { get; set; }
+    string JournalName { get; set; }
+    string JournalDescription { get; set; }
+    Journal? journalModel;
+
+    void OnPublisherChanged(Guid publisherId)
+    {
+
+        if (publisherId == creatingGuid)
+        {
+            createNewPublisher = true;
+        }
+        else
+        {
+            createNewPublisher = false;
+            var publisher = publishers.FirstOrDefault(p => p.Id == publisherId);
+            if (publisher != null)
+            {
+                Model.PublisherId = publisher.Id;
+            }
+        }
+    }
+    void OnJournalChanged(Guid journalId)
+    {
+
+        if (journalId == creatingGuid)
+        {
+            createNewJournal = true;
+        }
+        else
+        {
+            createNewJournal = false;
+            journalModel = journals.FirstOrDefault(p => p.Id == journalId);
+            StateHasChanged();
+
+        }
+    }
+    protected override void OnInitialized()
+    {
+        publishers = publisherService.Table.ToList();
+        journals = journalService.Table.Include(j => j.Volumes).ToList();
+    }
+
+    void AddJournal()
+    {
+        if (string.IsNullOrWhiteSpace(JournalName) || string.IsNullOrWhiteSpace(JournalDescription))
+        {
+            return;
+        }
+        if (!journals.Any(j => j.Name.Equals(JournalName, StringComparison.OrdinalIgnoreCase)))
+        {
+            var journal = new Journal { Name = JournalName, Description = JournalDescription };
+            journalService.Save(journal);
+            journals = journalService.Table.Include(j => j.Volumes).ToList();
+            journalModel = journals.FirstOrDefault(j => j.Name.Equals(JournalName, StringComparison.OrdinalIgnoreCase));
+            JournalName = string.Empty;
+            JournalDescription = string.Empty;
+            StateHasChanged();
+        }
+    }
+
+    void AddPublisher()
+    {
+        if (string.IsNullOrWhiteSpace(PublisherName))
+        {
+            return;
+        }
+        if (!publishers.Any(p => p.Name.Equals(PublisherName, StringComparison.OrdinalIgnoreCase)))
+        {
+            var publisher = new Publisher { Name = PublisherName };
+            publisherService.Save(publisher);
+            publishers = publisherService.Table.ToList();
+            Model.PublisherId = publishers.FirstOrDefault(p => p.Name.Equals(PublisherName, StringComparison.OrdinalIgnoreCase)).Id;
+            PublisherName = string.Empty;
+            StateHasChanged();
         }
 
     }

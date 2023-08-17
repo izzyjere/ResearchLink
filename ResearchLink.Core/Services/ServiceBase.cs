@@ -2,7 +2,7 @@
 
 internal abstract class ServiceBase<TEntity> : IServiceBase<TEntity> where TEntity : class, IEntity
 {
-    private readonly DatabaseContext _context;
+    protected readonly DatabaseContext _context;
     public ServiceBase(DatabaseContext context)
     {
         _context = context;

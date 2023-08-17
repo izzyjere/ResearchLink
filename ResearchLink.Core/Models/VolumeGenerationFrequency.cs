@@ -9,8 +9,9 @@
         [Description("Every 3 Months")]
         Quarterly,
         [Description("Every 6 Months")]
-        SemiAnually,
+        SemiAnnually,
         [Description("Every Year")]
         Yearly
+        
     }
 }

@@ -45,7 +45,8 @@ namespace ResearchLink.Core.Misc
         bool FileIsCleanable(string fileName)
         {
             var filePresent = _databaseContext.Set<Author>().Select(a=>a.Avatar).Any(f=>f.FileName==fileName);
-           return !filePresent;
+            var filePresent2 = _databaseContext.Set<Article>().Select(a=>a.Document).Any(f=>f.FileName==fileName);
+           return !filePresent && !filePresent2;
         }   
         public async Task RunFileStoreCleanUp()
         {
@@ -67,30 +68,38 @@ namespace ResearchLink.Core.Misc
             await mainCleaner;
         }
 
-        public  FileModel Upload(MemoryStream memoryStream, string contentType, FileStore fileStore)
+        public  FileModel? Upload(MemoryStream memoryStream, string contentType, FileStore fileStore)
         {
-            var root = Path.Combine(FileStoreRoot, fileStore.ToString());
-            if (!Directory.Exists(root))
+            try
             {
-                Directory.CreateDirectory(root);
+                var root = Path.Combine(FileStoreRoot, fileStore.ToString());
+                if (!Directory.Exists(root))
+                {
+                    Directory.CreateDirectory(root);
+                }
+                var path = GetRandomFileStructure()+Guid.NewGuid().ToString().Substring(0, 8).Replace("-", "_") + ".rlink";
+                var filePath = Path.Combine(root + path);
+                if (!Directory.Exists(Path.GetDirectoryName(filePath)))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+                }
+                FileStream fileStream = new(filePath, FileMode.Create, FileAccess.Write);
+                memoryStream.WriteTo(fileStream);
+                fileStream.Close();
+                _logger.LogInformation($"File uploaded to {filePath}");
+                return new FileModel
+                {
+                    ContentType = contentType,
+                    Path = path,
+                    FileStore = fileStore,
+                    FileName = Path.GetFileName(filePath)
+                };
             }
-            var path = GetRandomFileStructure()+Guid.NewGuid().ToString().Substring(0, 8).Replace("-", "_") + ".rlink";
-            var filePath = Path.Combine(root + path);
-            if (!Directory.Exists(Path.GetDirectoryName(filePath)))
-            {
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-            }
-            FileStream fileStream = new(filePath, FileMode.Create, FileAccess.Write);
-            memoryStream.WriteTo(fileStream);
-            fileStream.Close();
-            _logger.LogInformation($"File uploaded to {filePath}");
-            return new FileModel
-            {
-                ContentType = contentType,
-                Path = path,
-                FileStore = fileStore,
-                FileName = Path.GetFileName(filePath)
-            };
+            catch (Exception e)
+            {   
+                e.PrintStackTrace();
+                return null;                
+            }             
         }
         public static List<string> GetFilesRecursive(string directory)
         {

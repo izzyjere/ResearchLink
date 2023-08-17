@@ -26,8 +26,13 @@ public class DatabaseContext : DbContext
         modelBuilder.Entity<Author>()
            .OwnsOne(a => a.Avatar, av =>
            {
-               av.ToTable("ProfileImages");
-               av.Property(p => p.Id);
+               av.ToTable("ProfileImages");                 
+               av.WithOwner();
+           }); 
+        modelBuilder.Entity<Article>()
+           .OwnsOne(a => a.Document, av =>
+           {
+               av.ToTable("ArticleDocuments");               
                av.WithOwner();
            });
         foreach (var entityType in entityTypes)

@@ -3,5 +3,16 @@ function showErrorMessage(message) {
     $('#e-message-content').text(message)
 }
 function triggerInput(element) {
-    $(element).click();
+    $(element).click()
+}
+function focusDrag(element, enter) {
+    if (enter) {
+        $(element).addClass("focus")
+    } else {
+        $(element).removeClass("focus")
+    }
+}
+function previewDocument(blob) {
+    $("#dViewer").prop("src", blob);
+    $("#documentPreview").removeClass("d-none");
 }

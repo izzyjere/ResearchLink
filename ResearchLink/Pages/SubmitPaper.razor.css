@@ -1,2 +1,20 @@
-﻿body {
+﻿.drag-drop {
+    border: 1px dashed black;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-height: 200px;
+    cursor:pointer;
+}
+.drag-drop.focus {
+    border: 2px dashed #0075F2;
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    max-height: 200px;
+    background-color: #D0DDD7;
 }

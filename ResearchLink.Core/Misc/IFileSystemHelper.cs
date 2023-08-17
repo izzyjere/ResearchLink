@@ -10,5 +10,5 @@ public interface IFileSystemHelper
 {
     string ReadAsBlob(FileModel fileModel);
     Task RunFileStoreCleanUp();
-    FileModel Upload(MemoryStream memoryStream, string contentType, FileStore fileStore);
+    FileModel? Upload(MemoryStream memoryStream, string contentType, FileStore fileStore);
 }

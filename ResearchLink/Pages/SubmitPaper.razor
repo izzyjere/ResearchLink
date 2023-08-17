@@ -207,10 +207,15 @@
         if (claimsPrincipal !=null && claimsPrincipal.Identity.IsAuthenticated)
         {
             var currentAuthor = await authorService.Table.FirstOrDefaultAsync(a => a.UserId == claimsPrincipal.GetUserId());
-            if (currentAuthor is null)
+            if (currentAuthor is not null)
+            {
+                articleAuthors.Add(currentAuthor);
+            }
+            else
             {
                 Navigation.NavigateTo("/profile", true);
             }
+
         }
         else
         {

@@ -132,10 +132,11 @@
                     <Button Color="ButtonColor.Success" Type="ButtonType.Submit">Submit</Button>
                 </CardHeader>
                 <CardBody class="row">
-                    <div @ref="@dragElement" @onclick="OnDragClick" @ondragenter="OnDragEnter" @ondragleave="OnDragLeave" class="col-12 drag-drop">
-                        Drag and drop files here or click to upload.
+                    <div @ref="@dragElement" class="col-12 drag-drop">
+                        <InputFile style="position: absolute; width: 100%;height: 100%;opacity: 0;cursor: pointer;" @ondragenter="OnDragEnter" @ondragleave="OnDragLeave" @ref="@documentUpload" OnChange="OnFileUpload" id="documentUpload" accept=".pdf"></InputFile>
+                        Drag and drop files here or click to upload.                       
                     </div>
-                    <InputFile @ref="@documentUpload" hidden OnChange="OnFileUpload" id="documentUpload" accept=".pdf"></InputFile>
+                    
                     @if (documentFile !=null)
                     {
                         <div id="documentPreview" class="col-12">
@@ -289,6 +290,11 @@
     {
         await javaScriptRuntime.InvokeVoidAsync("triggerInput", documentUpload.Element);
     }
+    async Task OnDragDrop(DragEventArgs args)
+    {
+       await javaScriptRuntime.InvokeVoidAsync("onDragAreaDrop", args, documentUpload.Element);
+    }
+
     async Task OnFileUpload(InputFileChangeEventArgs args)
     {
         try
@@ -311,6 +317,7 @@
         }
 
     }
+   
 }
 @code {
     bool createNewPublisher, createNewJournal;

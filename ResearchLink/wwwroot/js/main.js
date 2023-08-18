@@ -16,3 +16,9 @@ function previewDocument(blob) {
     $("#dViewer").prop("src", blob);
     $("#documentPreview").removeClass("d-none");
 }
+function onDragAreaDrop(dragEvent, inputFile) {
+    let files = dragEvent.dataTransfer.files;
+    if (files.length > 0) {
+        $(inputFile).prop("files", files);
+    }
+}

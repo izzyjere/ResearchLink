@@ -267,6 +267,7 @@
             var currentAuthor = await authorService.Table.FirstOrDefaultAsync(a => a.UserId == claimsPrincipal.GetUserId());
             if (currentAuthor is not null)
             {
+                Model.Authors = new List<AuthorArticle>();
                 articleAuthors.Add(currentAuthor);
             }
             else
@@ -334,6 +335,7 @@
         {
             Model.Citations = citations;
         }
+        Model.DatePublished = DateTime.Now;
         var saved = articleService.Save(Model);
         if (saved.Succeded)
         {

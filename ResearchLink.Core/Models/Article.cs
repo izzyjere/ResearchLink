@@ -14,7 +14,7 @@ public class Article  : Entity
     public ICollection<Citation> Citations { get; set; }  
     public ICollection<AuthorArticle> Authors { get; set; }
     public int Year => DatePublished.Year;
-    public string Pages { get; set; }
+    public string? Pages { get; set; }
     public Guid? VolumeId { get; set; }
     public virtual  Volume? Volume { get; set; }
     [Required]

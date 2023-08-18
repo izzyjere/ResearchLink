@@ -285,15 +285,7 @@
     async Task OnDragLeave(DragEventArgs args)
     {
         await javaScriptRuntime.InvokeVoidAsync("focusDrag", dragElement, false);
-    }
-    async Task OnDragClick()
-    {
-        await javaScriptRuntime.InvokeVoidAsync("triggerInput", documentUpload.Element);
-    }
-    async Task OnDragDrop(DragEventArgs args)
-    {
-       await javaScriptRuntime.InvokeVoidAsync("onDragAreaDrop", args, documentUpload.Element);
-    }
+    }   
 
     async Task OnFileUpload(InputFileChangeEventArgs args)
     {

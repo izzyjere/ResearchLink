@@ -43,6 +43,7 @@
                                             }
                                             <option class="text-info" value="@creatingGuid">Create new publisher</option>
                                         </InputSelect>
+                                        <ValidationMessage For="()=>Model.PublisherId"/>
                                     }
                                 </div>
                             </div>
@@ -277,6 +278,16 @@
                 });
             return;
         }
+        if(Model.Document is null)
+        {
+            toastService.Notify(new ToastMessage
+                {
+                    Message = "Upload a document",
+                    IconName = IconName.Exclamation,
+                    Type = ToastType.Danger
+                });
+            return;
+        };
     }
     async Task OnDragEnter(DragEventArgs args)
     {
@@ -301,6 +312,12 @@
             var memoryStream = new MemoryStream();
             await fileStream.CopyToAsync(memoryStream);
             documentFile = fileSystemHelper.Upload(memoryStream, file.ContentType, Core.Shared.FileStore.documents);
+            if(documentFile is null)
+            {
+                toastService.Notify(new ToastMessage(ToastType.Danger, "File upload failed. Try again."));
+                return;
+            };
+            Model.Document = documentFile;
             StateHasChanged();
         }
         catch (Exception)

@@ -43,7 +43,7 @@
                                             }
                                             <option class="text-info" value="@creatingGuid">Create new publisher</option>
                                         </InputSelect>
-                                        <ValidationMessage For="()=>Model.PublisherId"/>
+                                        <ValidationMessage For="()=>Model.PublisherId" />
                                     }
                                 </div>
                             </div>
@@ -161,9 +161,9 @@
                 <CardBody class="row">
                     <div @ref="@dragElement" class="col-12 drag-drop">
                         <InputFile style="position: absolute; width: 100%;height: 100%;opacity: 0;cursor: pointer;" @ondragenter="OnDragEnter" @ondragleave="OnDragLeave" @ref="@documentUpload" OnChange="OnFileUpload" id="documentUpload" accept=".pdf"></InputFile>
-                        Drag and drop files here or click to upload.                       
+                        Drag and drop files here or click to upload.
                     </div>
-                    
+
                     @if (documentFile !=null)
                     {
                         <div id="documentPreview" class="col-12">
@@ -246,7 +246,7 @@
     List<Citation> citations = new List<Citation>();
     void OnCititationAdded(Article article)
     {
-       
+
     }
     private async Task<AutoCompleteDataProviderResult<Author>> AuthorsDataProvider(AutoCompleteDataProviderRequest<Author> request)
     {
@@ -314,7 +314,7 @@
                 });
             return;
         }
-        if(Model.Document is null)
+        if (Model.Document is null)
         {
             toastService.Notify(new ToastMessage
                 {
@@ -323,7 +323,27 @@
                     Type = ToastType.Danger
                 });
             return;
-        };
+        }
+        int order = 1;
+        foreach (var author in articleAuthors)
+        {
+            Model.Authors.Add(new AuthorArticle { AuthorId = author.Id, Order=order });
+            order++;
+        }
+        if (citations.Count>0)
+        {
+            Model.Citations = citations;
+        }
+        var saved = articleService.Save(Model);
+        if (saved.Succeded)
+        {
+            toastService.Notify(new ToastMessage { Title="Success", Message = "Paper Submited Successfully.", Type=ToastType.Success, IconName=IconName.Check });
+            Navigation.NavigateTo($"/?author={currentAuthor?.Id}");
+        }
+        else
+        {
+            toastService.Notify(new ToastMessage { Title="Error", Message = "Paper submission failed.", Type=ToastType.Danger, IconName=IconName.Exclamation });
+        }
     }
     async Task OnDragEnter(DragEventArgs args)
     {
@@ -332,7 +352,7 @@
     async Task OnDragLeave(DragEventArgs args)
     {
         await javaScriptRuntime.InvokeVoidAsync("focusDrag", dragElement, false);
-    }   
+    }
 
     async Task OnFileUpload(InputFileChangeEventArgs args)
     {
@@ -348,7 +368,7 @@
             var memoryStream = new MemoryStream();
             await fileStream.CopyToAsync(memoryStream);
             documentFile = fileSystemHelper.Upload(memoryStream, file.ContentType, Core.Shared.FileStore.documents);
-            if(documentFile is null)
+            if (documentFile is null)
             {
                 toastService.Notify(new ToastMessage(ToastType.Danger, "File upload failed. Try again."));
                 return;
@@ -362,7 +382,7 @@
         }
 
     }
-   
+
 }
 @code {
     bool createNewPublisher, createNewJournal;

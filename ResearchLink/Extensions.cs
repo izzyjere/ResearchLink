@@ -17,7 +17,7 @@ public static class Extensions
         {
             throw new Exception("Some services are missing: Name{IFileSystemHelper}");
         }
-        RecurringJob.AddOrUpdate("FileStore_Cleaner", () => service.RunFileStoreCleanUp(), "*/5 * * * *");
+        RecurringJob.AddOrUpdate("FileStore_Cleaner", () => service.RunFileStoreCleanUp(), "*/60 * * * *");
         return app;
     } 
     internal static IApplicationBuilder InitVolumeGenerator(this IApplicationBuilder app)

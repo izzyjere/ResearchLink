@@ -238,7 +238,7 @@
     </FooterTemplate>
 </Modal>
 @code {
-    Article Model = new Article { Publisher = new Publisher() };
+    Article Model = new Article { Authors = new List<AuthorArticle>() };
     Author? currentAuthor;
     [CascadingParameter]
     Task<AuthenticationState> AuthenticationStateTask { get; set; }
@@ -271,9 +271,8 @@
         if (claimsPrincipal !=null && claimsPrincipal.Identity.IsAuthenticated)
         {
             var currentAuthor = await authorService.Table.FirstOrDefaultAsync(a => a.UserId == claimsPrincipal.GetUserId());
-            if (currentAuthor is not null)
-            {
-                Model.Authors = new List<AuthorArticle>();
+            if (currentAuthor is not null)            {
+               
                 articleAuthors.Add(currentAuthor);
             }
             else

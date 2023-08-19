@@ -1,6 +1,4 @@
-﻿using System.ComponentModel;
-
-namespace ResearchLink.Core.Models;
+﻿namespace ResearchLink.Core.Models;
 
 public enum ResearchType
 {

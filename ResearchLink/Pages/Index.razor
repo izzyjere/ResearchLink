@@ -52,8 +52,7 @@
                                     
                                     <p class="card-text">Abstract: @GetBiographyPreview(item.Description)</p>
                                     <a href="research?p=@(item.Id)" class="btn btn-primary"><i class="fas fa-file-alt"></i> View More</a>
-                                    <a href="#" class="btn btn-danger"><i class="fas fa-download"></i> Download PDF</a>
-
+                                    <button @onclick="()=>DownloadPaper(item)" class="btn btn-danger"><i class="fas fa-file-pdf"></i> Download PDF</button>
                                 </div>
                             </div>
                         </div>
@@ -102,5 +101,9 @@
         const int maxPreviewLength = 100;
         var strippedBiography = Regex.Replace(biography, "<.*?>", string.Empty); // Remove HTML tags, if any
         return strippedBiography.Length > maxPreviewLength ? $"{strippedBiography.Substring(0, maxPreviewLength)}..." : strippedBiography;
+    }
+    async Task DownloadPaper(Article model)
+    {
+        await javaScriptRuntime.InvokeVoidAsync("downloadFile", new { blob = fileSystemHelper.ReadAsBlob(model.Document), fileName = $"link_{model.Title.Replace(" ", "_").Substring(0, 10)}.pdf" });
     }
 }

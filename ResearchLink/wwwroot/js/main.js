@@ -12,3 +12,10 @@ function focusDrag(element, enter) {
         $(element).removeClass("focus")
     }
 }
+function downloadFile(fileModel) {
+    var link = document.createElement("a");
+    link.download = fileModel.fileName;
+    link.href = fileModel.blob;
+    link.click();
+    link.remove();
+}

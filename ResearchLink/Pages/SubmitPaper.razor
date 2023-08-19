@@ -351,6 +351,16 @@
                 });
             return;
         }
+        if(Model.Type == ResearchType.JournalArticle && !Model.VolumeId.HasValue)
+        {
+            toastService.Notify(new ToastMessage
+                    {
+                        Message = "Journal articles require a volume.",
+                        IconName = IconName.Exclamation,
+                        Type = ToastType.Danger
+                    });
+            return;
+        }
         var confirmation = await dialog.ShowAsync("Confirm", "Are you sure you want to submit this paper?", new ConfirmDialogOptions { IsVerticallyCentered=true });
         if (!confirmation)
         {

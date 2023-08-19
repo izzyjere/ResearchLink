@@ -1,4 +1,6 @@
 ﻿@page "/"
+@using System.Text;
+@using System.Text.RegularExpressions;
 
 <PageTitle>Index</PageTitle>
 <div class="container mt-5">
@@ -15,52 +17,90 @@
                 <NotAuthorized>
                     <div class="mt-4 float-end">Not yet a member? <a href="signup">Signup here</a></div>
                 </NotAuthorized>
-            </AuthorizeView>            
+            </AuthorizeView>
         </div>
     </div>
 </div>
 <div class="container mt-4">
     <div class="row">
-        <div class="col-md-6">
-            <div class="card mb-3">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="https://picsum.photos/320/400" alt="Paper Image" class="img-fluid">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <h5 class="card-title">Research Paper Title 1</h5>
-                            <p class="card-text">Authors: John Doe, Jane Smith</p>
-                            <p class="card-text">Published in: Journal of XYZ</p>
-                            <p class="card-text">Abstract: Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
-                            <a href="#" class="btn btn-primary"><i class="fas fa-file-alt"></i> Cite in BibTeX</a>
-                            <a href="#" class="btn btn-danger"><i class="fas fa-download"></i> Download PDF</a>
+        @if (articles.Any())
+        {
+            @foreach (var item in articles)
+            {
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                <img src="https://picsum.photos/320/400" alt="Paper Image" class="img-fluid">
+                            </div>
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <h5 class="card-title">@item.Title</h5>
+                                    <p class="card-text">Authors: @GetAuthorNames(item)</p>
+                                    <p class="card-text">Published: @item.DatePublished.Humanize(false)</p>
+                                    @switch (item.Type)
+                                    {
+                                      case ResearchType.JournalArticle:
+                                            <p class="card-text">Published in: Journal of XYZ</p>
+                                            <p class="card-text">Volume: @item?.Volume?.Number pp: @item.Pages </p>
+                                            break;
+                                        default:
+                                            <p class="card-text">Type: @item.Type.GetDescription()</p>
+                                            <p class="card-text">Publisher: @item.Publisher.Name</p>
+                                            break;
+                                    }
+                                    
+                                    <p class="card-text">Abstract: @GetBiographyPreview(item.Description)</p>
+                                    <a href="research?p=@(item.Id)" class="btn btn-primary"><i class="fas fa-file-alt"></i> View More</a>
+                                    <a href="#" class="btn btn-danger"><i class="fas fa-download"></i> Download PDF</a>
+
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="card mb-3">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                        <img src="https://picsum.photos/320/400" a alt="Paper Image" class="img-fluid">
-                    </div>
-                    <div class="col-md-8">
-                        <div class="card-body">
-                            <h5 class="card-title">Research Paper Title 2</h5>
-                            <p class="card-text">Authors: Alice Johnson, Bob Williams</p>
-                            <p class="card-text">Published in: Proceedings of ABC Conference</p>
-                            <p class="card-text">Abstract: Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua...</p>
-                            <a href="#" class="btn btn-primary"><i class="fas fa-file-alt"></i> Cite in BibTeX</a>
-                            <a href="#" class="btn btn-danger"><i class="fas fa-download"></i> Download PDF</a>
-                        </div>
-                    </div>
+            }
+        }
+        else
+        {
+            <center>
+                <div class="col-6 mt-4">
+                    <Alert Color="AlertColor.Primary"> <Icon Name="IconName.InfoCircleFill" class="me-2"></Icon> No research papers found. Be the first to submit a paper <a href="submit">here</a></Alert>
                 </div>
-            </div>
-        </div>
-
-        <!-- Add more col-md-6 divs for more research papers -->
+            </center>
+        }
     </div>
 </div>
+
+@code {
+    IEnumerable<Article> articles = Enumerable.Empty<Article>();
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadArticles();
+    }
+    async Task LoadArticles()
+    {
+        articles = await articleService.Table.Include(a=>a.Volume).ThenInclude(v=>v.Journal).ToListAsync();
+    }
+    MarkupString GetAuthorNames(Article article)
+    {
+        var authors = article.Authors.Select(a => a.Author).ToList();
+        var stringBuilder = new StringBuilder();
+        var index = 1;
+        @foreach (var item in authors)
+        {
+            stringBuilder.Append($"<a href='profile?uid={item.UserId}'>{item.Name}</a>");
+            if (index != authors.Count)
+            {
+                stringBuilder.Append(", ");
+            }
+        }
+        return new MarkupString(stringBuilder.ToString());
+    }
+    private string GetBiographyPreview(string biography)
+    {
+        const int maxPreviewLength = 100;
+        var strippedBiography = Regex.Replace(biography, "<.*?>", string.Empty); // Remove HTML tags, if any
+        return strippedBiography.Length > maxPreviewLength ? $"{strippedBiography.Substring(0, maxPreviewLength)}..." : strippedBiography;
+    }
+}

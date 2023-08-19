@@ -1,7 +1,7 @@
 ﻿@page "/submit"
 @using ResearchLink.Core.Shared;
 <div class="container mt-5">
-    <h3>Submit Paper</h3>
+    <h3>Submit a research</h3>
     <EditForm Model="@Model" OnValidSubmit="SubmitPaperAsync">
         <div class="row">
             <DataAnnotationsValidator />
@@ -95,11 +95,11 @@
                                                 }
                                             </InputSelect>
                                         </div>
-                                    </div> 
+                                    </div>
                                     <div class="col-12 mb-3">
                                         <div class="form-group">
                                             <label for="pages">Page</label>
-                                            <InputText class="form-control" placeholder="Pages" id="pages" @bind-Value="@Model.Pages"/>                                             
+                                            <InputText class="form-control" placeholder="Pages" id="pages" @bind-Value="@Model.Pages" />
                                         </div>
                                     </div>
                                 }
@@ -237,6 +237,7 @@
         <Button form="vConfigForm" LoadingText="Saving.." Loading="@processing" Type="ButtonType.Submit" Color="ButtonColor.Primary">Save changes</Button>
     </FooterTemplate>
 </Modal>
+<ConfirmDialog @ref="dialog" />
 @code {
     Article Model = new Article { Authors = new List<AuthorArticle>() };
     Author? currentAuthor;
@@ -249,6 +250,7 @@
     ElementReference dragElement;
     InputFile documentUpload;
     FileModel? documentFile;
+    ConfirmDialog dialog;
     List<Citation> citations = new List<Citation>();
     void OnCititationAdded(Article article)
     {
@@ -271,8 +273,9 @@
         if (claimsPrincipal !=null && claimsPrincipal.Identity.IsAuthenticated)
         {
             var currentAuthor = await authorService.Table.FirstOrDefaultAsync(a => a.UserId == claimsPrincipal.GetUserId());
-            if (currentAuthor is not null)            {
-               
+            if (currentAuthor is not null)
+            {
+
                 articleAuthors.Add(currentAuthor);
             }
             else
@@ -308,8 +311,9 @@
             StateHasChanged();
         }
     }
-    void SubmitPaperAsync()
+    async void SubmitPaperAsync()
     {
+
         if (articleAuthors.Count == 0)
         {
             toastService.Notify(new ToastMessage
@@ -328,6 +332,11 @@
                     IconName = IconName.Exclamation,
                     Type = ToastType.Danger
                 });
+            return;
+        }
+        var confirmation = await dialog.ShowAsync("Confirm", "Are you sure you want to submit this paper?", new ConfirmDialogOptions { IsVerticallyCentered=true });
+        if (!confirmation)
+        {
             return;
         }
         int order = 1;

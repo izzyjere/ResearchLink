@@ -5,5 +5,6 @@ internal class CitationService : ServiceBase<Citation>, ICitationService
 {
     public CitationService(DatabaseContext context) : base(context)
     {
+        
     }
 }

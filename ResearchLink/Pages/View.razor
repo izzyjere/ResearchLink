@@ -1,0 +1,63 @@
+﻿@page "/research"
+<div class="container mt-5">
+    @if (Model != null)
+    {
+        <Card>
+            <CardHeader>
+                <CardTitle>@Model.Title</CardTitle>
+            </CardHeader>
+            <CardBody>
+                <div class="row">
+                    <div class="col-xs-12 col-md-6">
+                        <h6>Abstract</h6><hr/>
+                        <p class="text-justify pa-2">@Model.Description</p>
+                    </div>
+                    <div class="col-xs-12 col-md-6">
+                        <div class="row">
+                            <div class="col-6 col-xs-12">
+                                Published : <span class="text-info">@Model.DatePublished.Humanize(false)</span>
+                            </div>
+                            <div class="col-6 col-xs-12">
+                                Publisher : <span class="text-info">@Model.Publisher.Name</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </CardBody>
+            <CardFooter>
+                <a href=""  class="btn btn-danger"><i class="fas fa-file-pdf"></i> Download PDF</a>
+                <a @onclick="async ()=> await viewDocModal.ShowAsync()" class="btn btn-info"><i class="fas fa-file"></i> View</a>
+            </CardFooter>
+        </Card>
+        <Modal @ref=@viewDocModal Size="ModalSize.Large" ShowCloseButton IsVerticallyCentered>
+            <BodyTemplate>
+                <embed width="100%" type="application/pdf" src="@fileSystemHelper.ReadAsBlob(Model.Document)" style="height:70vh" />
+            </BodyTemplate>
+            <FooterTemplate>
+                <Button @onclick=" async ()=> await viewDocModal.HideAsync()" Color="ButtonColor.Secondary">Close</Button>
+            </FooterTemplate>
+        </Modal>
+    }
+    else
+    {
+        <div class="d-flex align-items-center justify-content-center">
+            <Alert Color="AlertColor.Danger"> <Icon Name="IconName.InfoCircleFill" class="me-2"></Icon> Something went wrong <a href="/">home</a></Alert>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "p")]
+    public Guid Id { get; set; }
+    Article? Model { get; set; }
+    Modal viewDocModal;
+    protected override async Task OnInitializedAsync()
+    {
+        Model = await articleService.Table
+                                    .Include(a => a.Volume)
+                                    .ThenInclude(v => v.Journal)
+                                    .FirstOrDefaultAsync(x=>x.Id==Id);
+        StateHasChanged();
+    }
+}

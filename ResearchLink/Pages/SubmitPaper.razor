@@ -1,7 +1,8 @@
 ﻿@page "/submit"
+@page "/edit"
 @using ResearchLink.Core.Shared;
 <div class="container mt-5">
-    <h3>Submit a research</h3>
+    <h3>@(Id!=Guid.Empty?"Edit":"Submit a") research</h3>
     <EditForm Model="@Model" OnValidSubmit="SubmitPaperAsync">
         <div class="row">
             <DataAnnotationsValidator />
@@ -252,6 +253,9 @@
     FileModel? documentFile;
     ConfirmDialog dialog;
     List<Citation> citations = new List<Citation>();
+    [Parameter]
+    [SupplyParameterFromQuery(Name ="p")]
+    public Guid Id { get; set; }
     void OnCititationAdded(Article article)
     {
 
@@ -277,6 +281,19 @@
             {
 
                 articleAuthors.Add(currentAuthor);
+                if(Id != Guid.Empty)
+                {
+                    var model = await articleService.Table
+                                      .Include(a => a.Volume)
+                                      .ThenInclude(v => v.Journal)
+                                      .FirstOrDefaultAsync(x => x.Id==Id);
+                    if(model is not null)
+                    {
+                        Model = model;
+                        StateHasChanged();
+                    }
+
+                }
             }
             else
             {

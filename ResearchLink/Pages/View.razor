@@ -25,6 +25,10 @@
                 </div>
             </CardBody>
             <CardFooter>
+                @if (isMyResearch)
+                {
+                    <a href="edit?p=@(Model.Id)" class="btn btn-success mx-4"><i class="fas fa-edit"></i> Edit</a>
+                }
                 <a href=""  class="btn btn-danger"><i class="fas fa-file-pdf"></i> Download PDF</a>
                 <a @onclick="async ()=> await viewDocModal.ShowAsync()" class="btn btn-info"><i class="fas fa-file"></i> View</a>
             </CardFooter>
@@ -52,12 +56,20 @@
     public Guid Id { get; set; }
     Article? Model { get; set; }
     Modal viewDocModal;
+    bool isMyResearch;
+    [CascadingParameter]
+    Task<AuthenticationState> AuthenticationStateTask { get; set; }
     protected override async Task OnInitializedAsync()
     {
         Model = await articleService.Table
                                     .Include(a => a.Volume)
                                     .ThenInclude(v => v.Journal)
                                     .FirstOrDefaultAsync(x=>x.Id==Id);
+        var currentUser = (await AuthenticationStateTask).User;
+        if (Model != null && currentUser?.Identity != null && currentUser.Identity.IsAuthenticated)
+        {
+            isMyResearch = Model.Authors.Any(a => a.Author.UserId == currentUser.GetUserId());
+        }
         StateHasChanged();
     }
 }

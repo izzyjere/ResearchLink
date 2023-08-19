@@ -9,7 +9,7 @@
             <CardBody>
                 <div class="row">
                     <div class="col-xs-12 col-md-6">
-                        <h6>Abstract</h6><hr/>
+                        <h6>Abstract</h6><hr />
                         <p class="text-justify pa-2">@Model.Description</p>
                     </div>
                     <div class="col-xs-12 col-md-6">
@@ -21,6 +21,59 @@
                                 Publisher : <span class="text-info">@Model.Publisher.Name</span>
                             </div>
                         </div>
+                        <hr />
+                        <div class="row mt-4 p-4">
+                            <table class="table table-striped table-bordered table-sm">
+                                <colgroup>
+                                    <col width="40%" />
+                                    <col width="60%" />
+                                </colgroup>
+                                <tr>
+                                    <td class="text-bold">Type</td>
+                                    <td>@Model.Type.GetDescription()</td>
+                                </tr>
+                                @if (Model.Type==ResearchType.JournalArticle)
+                                {
+                                    <tr>
+                                        <td class="text-bold">Published In:</td>
+                                        <td>@Model?.Volume?.Journal?.Name</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-bold">Volume:</td>
+                                        <td>@Model?.Volume?.Number</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-bold">Pages:</td>
+                                        <td>@Model?.Pages</td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td class="text-bold">Year:</td>
+                                    <td>@Model?.Year</td>
+                                </tr>
+
+                            </table>
+                        </div>
+                        <div class="row p-4">
+                            <h6>Authors</h6>
+                            <ul style="height:300px" class="list-group overflow-auto">
+                                @if (Model.Authors.Any())
+                                {
+                                    foreach (var item in Model.Authors)
+                                    {
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div class="me-3">
+                                                <img width="48" height="48" style="object-fit:contain !important;border-radius:50%" src="@(fileSystemHelper.ReadAsBlob(item?.Author?.Avatar))" alt="User Profile" class="img-fluid">
+
+                                                <a href="profile?uid=@(item.Author.UserId)" class="link-normal">@item.Author.FullName</a>
+                                            </div>
+
+                                            <span class="badge badge-primary badge-pill">1</span>
+                                        </li>
+                                    }
+                                }
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </CardBody>
@@ -29,18 +82,18 @@
                 {
                     <a href="edit?p=@(Model.Id)" class="btn btn-success mx-4"><i class="fas fa-edit"></i> Edit</a>
                 }
-                <a href=""  class="btn btn-danger"><i class="fas fa-file-pdf"></i> Download PDF</a>
+                <a href="" class="btn btn-danger"><i class="fas fa-file-pdf"></i> Download PDF</a>
                 <a @onclick="async ()=> await viewDocModal.ShowAsync()" class="btn btn-info"><i class="fas fa-file"></i> View</a>
             </CardFooter>
         </Card>
         <Modal @ref=@viewDocModal Size="ModalSize.Large" ShowCloseButton IsVerticallyCentered>
-            <BodyTemplate>
-                <embed width="100%" type="application/pdf" src="@fileSystemHelper.ReadAsBlob(Model.Document)" style="height:70vh" />
-            </BodyTemplate>
-            <FooterTemplate>
-                <Button @onclick=" async ()=> await viewDocModal.HideAsync()" Color="ButtonColor.Secondary">Close</Button>
-            </FooterTemplate>
-        </Modal>
+         <BodyTemplate>
+             <embed width="100%" type="application/pdf" src="@fileSystemHelper.ReadAsBlob(Model.Document)" style="height:70vh" />
+         </BodyTemplate>
+         <FooterTemplate>
+             <Button @onclick=" async ()=> await viewDocModal.HideAsync()" Color="ButtonColor.Secondary">Close</Button>
+         </FooterTemplate>
+     </Modal>
     }
     else
     {
@@ -64,7 +117,7 @@
         Model = await articleService.Table
                                     .Include(a => a.Volume)
                                     .ThenInclude(v => v.Journal)
-                                    .FirstOrDefaultAsync(x=>x.Id==Id);
+                                    .FirstOrDefaultAsync(x => x.Id==Id);
         var currentUser = (await AuthenticationStateTask).User;
         if (Model != null && currentUser?.Identity != null && currentUser.Identity.IsAuthenticated)
         {

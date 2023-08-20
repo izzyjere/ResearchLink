@@ -310,7 +310,7 @@
     }
     void OnVolumePicked(Guid? args)
     {
-      
+
         if(args.Value != Guid.Empty)
         {
             Model.VolumeId = args.Value;
@@ -409,6 +409,7 @@
     {
         try
         {
+            preloadService.Show(SpinnerColor.Warning);
             var file = args.File;
             if (file.Size > 10000000)
             {
@@ -426,10 +427,15 @@
             };
             Model.Document = documentFile;
             StateHasChanged();
+            preloadService.Hide();
         }
         catch (Exception)
         {
             toastService.Notify(new ToastMessage(ToastType.Danger, "File upload failed. Try again."));
+        }
+        finally
+        {
+            preloadService.Hide();
         }
 
     }

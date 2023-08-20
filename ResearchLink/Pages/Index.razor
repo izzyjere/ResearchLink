@@ -6,10 +6,37 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <form class="input-group">
-                <input type="text" class="form-control" placeholder="Search for papers...">
-                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
-            </form>
+            <EditForm Model="@searchModel">
+                <div class="input-group">
+                    <InputText @bind-Value="@searchModel.SearchText" class="form-control" placeholder="Search for papers..." />
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
+                </div>
+                <div class="row advanced-search">
+                    <div class="col-12">
+                        <Switch @bind-Value="@searchModel.Advanced" Label="Advanced Filters" />
+                    </div>
+                    @if (searchModel.Advanced)
+                    {
+                        <div class="col-4">
+                            <label for="type">Research Type</label>
+                            <InputSelect @bind-Value="@searchModel.Type" id="type" class="form-select">
+                                @foreach (ResearchType item in Enum.GetValues(typeof(ResearchType)))
+                                {
+                                    <option value="@item">@item.GetDescription()</option>
+                                }
+                            </InputSelect>
+                        </div>
+                        <div class="col-4">
+                            <label for="startDate">Published Date</label>
+                            <DateInput @bind-Value="@searchModel.StartDate" TValue="DateOnly" ElementId="startDate"></DateInput>
+                        </div>
+                        <div class="col-4">
+                            <label for="endDate">Published Date</label>
+                            <DateInput @bind-Value="@searchModel.EndDate" ElementId="endDate" TValue="DateOnly"></DateInput>
+                        </div>
+                    }
+                </div>
+            </EditForm>            
             <AuthorizeView>
                 <Authorized>
                     <div class="mt-4 float-end">Have something in mind? <a href="submit">Submit your research here</a></div>
@@ -23,15 +50,15 @@
 </div>
 <div class="container mt-4">
     <div class="row">
-        @if (articles.Any())
+        @if (pageModel != null)
         {
-            @foreach (var item in articles)
+            @foreach (var item in pageModel.Items)
             {
                 <div class="col-md-6">
                     <div class="card mb-3">
                         <div class="row g-0">
                             <div class="col-md-4">
-                                <img src="https://picsum.photos/320/400" alt="Paper Image" class="img-fluid">
+                                <img src="https://picsum.photos/320/500" alt="Paper Image" class="img-fluid">
                             </div>
                             <div class="col-md-8">
                                 <div class="card-body">
@@ -40,7 +67,7 @@
                                     <p class="card-text">Published: @item.DatePublished.Humanize(false)</p>
                                     @switch (item.Type)
                                     {
-                                      case ResearchType.JournalArticle:
+                                        case ResearchType.JournalArticle:
                                             <p class="card-text">Published in: Journal of XYZ</p>
                                             <p class="card-text">Volume: @item?.Volume?.Number pp: @item.Pages </p>
                                             break;
@@ -49,7 +76,7 @@
                                             <p class="card-text">Publisher: @item.Publisher.Name</p>
                                             break;
                                     }
-                                    
+
                                     <p class="card-text">Abstract: @GetBiographyPreview(item.Description)</p>
                                     <a href="research?p=@(item.Id)" class="btn btn-primary"><i class="fas fa-file-alt"></i> View More</a>
                                     <button @onclick="()=>DownloadPaper(item)" class="btn btn-danger"><i class="fas fa-file-pdf"></i> Download PDF</button>
@@ -59,6 +86,24 @@
                     </div>
                 </div>
             }
+            <div class="col-12 mt-4">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        <li class='@(pageModel.PageNumber == 1?"page-item disabled":"page-item")'>
+                            <button @onclick="()=>GoToPage(pageModel.PageNumber-1)" class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</button>
+                        </li>
+                        @for(int i = 1; i <= pageModel.TotalPages; i++)
+                        {
+                            var pageItem = new PageItem(i, pageModel.PageNumber == i);
+                            <li class='@pageItem.Active?"page-item active":"page-item")'><button @onclick="()=>GoToPage(pageItem.PageNumber)" class="page-link">@i</button></li>
+                        }
+                        <li  class='@(pageModel.PageNumber == pageModel.TotalPages?"page-item disabled":"page-item")'>
+                            <button @onclick="()=>GoToPage(pageModel.PageNumber+1)" class="page-link">Next</button>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+         
         }
         else
         {
@@ -72,14 +117,25 @@
 </div>
 
 @code {
-    IEnumerable<Article> articles = Enumerable.Empty<Article>();
-    protected override async Task OnInitializedAsync()
+    Page<Article>? pageModel; 
+    SearchModel searchModel = new SearchModel();   
+    IEnumerable<Article> articlesList = new List<Article>();
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        await LoadArticles();
+        if(firstRender)
+            await LoadArticles();
     }
-    async Task LoadArticles()
+    async Task GoToPage(int pageNumber)
+    {   
+        if(pageNumber == pageModel?.PageNumber || pageNumber == 0)
+            return;
+        await LoadArticles(pageNumber); 
+    }
+    async Task LoadArticles(int page = 1 , int size = 2)
     {
-        articles = await articleService.Table.Include(a=>a.Volume).ThenInclude(v=>v.Journal).ToListAsync();
+        var pageRequest = new PageRequest(page,size);
+        pageModel = await articleService.Table.GetPageAsync(pageRequest);
+        await InvokeAsync(StateHasChanged);
     }
     MarkupString GetAuthorNames(Article article)
     {
@@ -106,4 +162,14 @@
     {
         await javaScriptRuntime.InvokeVoidAsync("downloadFile", new { blob = fileSystemHelper.ReadAsBlob(model.Document), fileName = $"link_{model.Title.Replace(" ", "_").Substring(0, 10)}.pdf" });
     }
+    class SearchModel
+    {
+        public string? SearchText { get; set; }
+        public ResearchType Type { get; set; }
+        public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+        public DateOnly EndDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
+        public bool Advanced { get; set; }
+    }
+   
+    
 }

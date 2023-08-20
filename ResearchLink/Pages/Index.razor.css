@@ -4,3 +4,9 @@
 .card-title{
     font-size:larger;
 }
+.advanced-search{
+    margin-top:0.7rem;
+}
+.advanced-search .row {
+    margin-top: 1rem;
+}

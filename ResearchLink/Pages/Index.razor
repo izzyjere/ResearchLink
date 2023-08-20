@@ -6,7 +6,7 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <EditForm Model="@searchModel">
+            <EditForm Model="@searchModel" OnValidSubmit="SearchAsync">
                 <div class="input-group">
                     <InputText @bind-Value="@searchModel.SearchText" class="form-control" placeholder="Search for papers..." />
                     <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
@@ -36,7 +36,7 @@
                         </div>
                     }
                 </div>
-            </EditForm>            
+            </EditForm>
             <AuthorizeView>
                 <Authorized>
                     <div class="mt-4 float-end">Have something in mind? <a href="submit">Submit your research here</a></div>
@@ -52,39 +52,61 @@
     <div class="row">
         @if (pageModel != null)
         {
-            @foreach (var item in pageModel.Items)
+            if (pageModel.Items.Count() == 0)
             {
-                <div class="col-md-6">
-                    <div class="card mb-3">
-                        <div class="row g-0">
-                            <div class="col-md-4">
-                                <img src="https://picsum.photos/320/500" alt="Paper Image" class="img-fluid">
-                            </div>
-                            <div class="col-md-8">
-                                <div class="card-body">
-                                    <h5 class="card-title">@item.Title</h5>
-                                    <p class="card-text">Authors: @GetAuthorNames(item)</p>
-                                    <p class="card-text">Published: @item.DatePublished.Humanize(false)</p>
-                                    @switch (item.Type)
-                                    {
-                                        case ResearchType.JournalArticle:
-                                            <p class="card-text">Published in: Journal of XYZ</p>
-                                            <p class="card-text">Volume: @item?.Volume?.Number pp: @item.Pages </p>
-                                            break;
-                                        default:
-                                            <p class="card-text">Type: @item.Type.GetDescription()</p>
-                                            <p class="card-text">Publisher: @item.Publisher.Name</p>
-                                            break;
-                                    }
+                if (searchModel.IsSearching)
+                {
+                    <center>
+                        <div class="col-6 mt-4">
+                            <Alert Dismissable OnClose="async ()=> await javaScriptRuntime.RefreshWindow()" Color="AlertColor.Info"> <Icon Name="IconName.InfoCircleFill" class="me-2"></Icon> No results found for your search.</Alert>
+                        </div>
+                    </center>
+                }
+                else
+                {
+                    <center>
+                        <div class="col-6 mt-4">
+                            <Alert Color="AlertColor.Primary"> <Icon Name="IconName.InfoCircleFill" class="me-2"></Icon> No research papers found. Be the first to submit a paper <a href="submit">here</a></Alert>
+                        </div>
+                    </center>
+                }
+            }
+            else
+            {
+                foreach (var item in pageModel.Items)
+                {
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="row g-0">
+                                <div class="col-md-4">
+                                    <img src="https://picsum.photos/320/500" alt="Paper Image" class="img-fluid">
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="card-body">
+                                        <h5 class="card-title">@item.Title</h5>
+                                        <p class="card-text">Authors: @GetAuthorNames(item)</p>
+                                        <p class="card-text">Published: @item.DatePublished.Humanize(false)</p>
+                                        @switch (item.Type)
+                                        {
+                                            case ResearchType.JournalArticle:
+                                                <p class="card-text">Published in: Journal of XYZ</p>
+                                                <p class="card-text">Volume: @item?.Volume?.Number pp: @item.Pages </p>
+                                                break;
+                                            default:
+                                                <p class="card-text">Type: @item.Type.GetDescription()</p>
+                                                <p class="card-text">Publisher: @item.Publisher.Name</p>
+                                                break;
+                                        }
 
-                                    <p class="card-text">Abstract: @GetBiographyPreview(item.Description)</p>
-                                    <a href="research?p=@(item.Id)" class="btn btn-primary"><i class="fas fa-file-alt"></i> View More</a>
-                                    <button @onclick="()=>DownloadPaper(item)" class="btn btn-danger"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                                        <p class="card-text">Abstract: @GetBiographyPreview(item.Description)</p>
+                                        <a href="research?p=@(item.Id)" class="btn btn-primary"><i class="fas fa-file-alt"></i> View More</a>
+                                        <button @onclick="()=>DownloadPaper(item)" class="btn btn-danger"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                }
             }
             <div class="col-12 mt-4">
                 <nav aria-label="Page navigation">
@@ -92,50 +114,65 @@
                         <li class='@(pageModel.PageNumber == 1?"page-item disabled":"page-item")'>
                             <button disabled="@(pageModel.PageNumber == 1)" @onclick="()=>GoToPage(pageModel.PageNumber-1)" class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</button>
                         </li>
-                        @for(int i = 1; i <= pageModel.TotalPages; i++)
+                        @for (int i = 1; i <= pageModel.TotalPages; i++)
                         {
                             var pageItem = new PageItem(i, pageModel.PageNumber == i);
                             <li class='@(pageItem.Active?"page-item active":"page-item")'><button @onclick="()=>GoToPage(pageItem.PageNumber)" class="page-link">@i</button></li>
                         }
-                        <li  class='@(pageModel.PageNumber == pageModel.TotalPages?"page-item disabled":"page-item")'>
+                        <li class='@(pageModel.PageNumber == pageModel.TotalPages?"page-item disabled":"page-item")'>
                             <button disabled="@(pageModel.PageNumber == pageModel.TotalPages)" @onclick="()=>GoToPage(pageModel.PageNumber+1)" class="page-link">Next</button>
                         </li>
                     </ul>
                 </nav>
             </div>
-         
-        }
-        else
-        {
-            <center>
-                <div class="col-6 mt-4">
-                    <Alert Color="AlertColor.Primary"> <Icon Name="IconName.InfoCircleFill" class="me-2"></Icon> No research papers found. Be the first to submit a paper <a href="submit">here</a></Alert>
-                </div>
-            </center>
+
         }
     </div>
 </div>
-
 @code {
-    Page<Article>? pageModel; 
-    SearchModel searchModel = new SearchModel();   
+    Page<Article>? pageModel;
+    SearchModel searchModel = new SearchModel();
     IEnumerable<Article> articlesList = new List<Article>();
+    IQueryable<Article>? query = null;
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if(firstRender)
+        if (firstRender)
             await LoadArticles();
     }
     async Task GoToPage(int pageNumber)
-    {   
-        if(pageNumber == pageModel?.PageNumber || pageNumber == 0 || pageNumber>pageModel?.TotalPages)
-            return;
-        await LoadArticles(pageNumber); 
-    }
-    async Task LoadArticles(int page = 1 , int size = 2)
     {
-        var pageRequest = new PageRequest(page,size);
-        pageModel = await articleService.Table.GetPageAsync(pageRequest);
-        await InvokeAsync(StateHasChanged);
+        if (pageNumber == pageModel?.PageNumber || pageNumber == 0 || pageNumber>pageModel?.TotalPages)
+            return;
+        await LoadArticles(pageNumber);
+    }
+    async Task LoadArticles(int page = 1, int size = 2, bool search = false)
+    {
+
+        try
+        {
+            preloadService.Show(SpinnerColor.Warning);
+            var pageRequest = new PageRequest(page, size);
+            if (search && query == null)
+            {
+                throw new Exception("Search without parameters is not supported.");
+            }
+            else
+            {
+                pageModel = await (query ??= articleService.Table).GetPageAsync(pageRequest);
+            }
+
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+        finally
+        {
+            preloadService.Hide();
+        }
+
     }
     MarkupString GetAuthorNames(Article article)
     {
@@ -162,6 +199,43 @@
     {
         await javaScriptRuntime.InvokeVoidAsync("downloadFile", new { blob = fileSystemHelper.ReadAsBlob(model.Document), fileName = $"link_{model.Title.Replace(" ", "_").Substring(0, 10)}.pdf" });
     }
+    async Task SearchAsync()
+    {
+        if (string.IsNullOrWhiteSpace(searchModel.SearchText) && !searchModel.Advanced)
+        {
+            return;
+        }
+        else if (!string.IsNullOrWhiteSpace(searchModel.SearchText) && searchModel.Advanced)
+        {
+
+            query = articleService.Table.Where(a => a.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                       a.Description.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                       a.Authors.Any(a => a.Author.Name.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
+                                       a.Authors.Any(a => a.Author.EmailAddress.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
+                                       a.Type == searchModel.Type ||
+                                       a.DatePublished >= searchModel.StartDate.ToDateTime(new TimeOnly(0, 0, 0)) &&
+                                       a.DatePublished <= searchModel.EndDate.ToDateTime(new TimeOnly(0, 0, 0)));
+            await LoadArticles(search: true);
+
+        }
+        else if (!string.IsNullOrWhiteSpace(searchModel.SearchText))
+        {
+            query = articleService.Table.Where(a => a.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                           a.Description.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                           a.Authors.Any(a => a.Author.Name.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
+                                           a.Authors.Any(a => a.Author.EmailAddress.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)));
+            await LoadArticles(search: true);
+        }
+        else if (searchModel.Advanced)
+        {
+            query = articleService.Table.Where(a => a.Type == searchModel.Type ||
+                                           a.DatePublished >= searchModel.StartDate.ToDateTime(new TimeOnly(0, 0, 0)) &&
+                                           a.DatePublished <= searchModel.EndDate.ToDateTime(new TimeOnly(0, 0, 0)));
+            await LoadArticles(search: true);
+        }
+
+    }
+
     class SearchModel
     {
         public string? SearchText { get; set; }
@@ -169,7 +243,6 @@
         public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
         public DateOnly EndDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
         public bool Advanced { get; set; }
+        public bool IsSearching => !string.IsNullOrWhiteSpace(SearchText) || Advanced;
     }
-   
-    
 }

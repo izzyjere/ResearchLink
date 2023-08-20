@@ -3,9 +3,12 @@ using Hangfire;
 using ResearchLink.Core.Misc;
 using System.ComponentModel;
 using ResearchLink.Core.Services;
+using Microsoft.JSInterop;
 
 public static class Extensions
 {
+    public static ValueTask RefreshWindow(this IJSRuntime jSRuntime) => jSRuntime.InvokeVoidAsync("window.location.reload");
+    public static DateOnly DateOnly(this DateTime dateTime) => new DateOnly(dateTime.Year, dateTime.Month, dateTime.Day);
     internal static IApplicationBuilder InitFileStoreCleaner(this IApplicationBuilder app)
     {
         var scope = app.ApplicationServices.CreateScope();

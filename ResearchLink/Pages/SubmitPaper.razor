@@ -89,7 +89,8 @@
                                     <div class="col-12 mb-3">
                                         <div class="form-group">
                                             <label for="volume">Volume</label>
-                                            <InputSelect class="form-select" id="volume" @bind-Value="@Model.VolumeId">
+                                            <InputSelect TValue="Guid?" ValueChanged="OnVolumePicked" class="form-select" id="volume" ValueExpression="()=>Model.VolumeId">
+                                                <option value="@Guid.Empty"> -- Select volume -- </option>
                                                 @foreach (var item in journalModel.Volumes)
                                                 {
                                                     <option value="@item.Id">@item.Number (@item.Year)</option>
@@ -307,7 +308,14 @@
         }
 
     }
-
+    void OnVolumePicked(Guid? args)
+    {
+      
+        if(args is not null && args.HasValue && args.Value != Guid.Empty)
+        {
+            Model.VolumeId = args.Value;
+        }
+    }
     void OnAuthorPicked(Author author)
     {
         if (author is not null)
@@ -381,7 +389,7 @@
         if (saved.Succeded)
         {
             toastService.Notify(new ToastMessage { Title="Success", Message = "Paper Submited Successfully.", Type=ToastType.Success, IconName=IconName.Check });
-            Navigation.NavigateTo($"/?author={currentAuthor?.Id}");
+            Navigation.NavigateTo($"/?author={claimsPrincipal.GetUserId().ToString()}",true);
         }
         else
         {

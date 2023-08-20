@@ -59,8 +59,8 @@
                     <center>
                         <div class="col-6 mt-4">
                             <Alert Dismissable OnClose="async ()=> await javaScriptRuntime.RefreshWindow()" Color="AlertColor.Info"> <Icon Name="IconName.InfoCircleFill" class="me-2"></Icon> No results found for your search.</Alert>
-                        </div>
-                    </center>
+                         </div>
+                     </center>
                 }
                 else
                 {
@@ -134,11 +134,28 @@
     SearchModel searchModel = new SearchModel();
     IEnumerable<Article> articlesList = new List<Article>();
     IQueryable<Article>? query = null;
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "type")]
+    public int Type { get; set; }
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "author")]
+    public Guid AuthorId { get; set; }
+    protected override async void OnInitialized()
     {
-        if (firstRender)
-            await LoadArticles();
-    }
+        if (Type > 0)
+        {
+            query = articleService.Table.Where(a => a.Type == (ResearchType)Type);
+        }
+        else if (AuthorId != Guid.Empty)
+        {
+            query = articleService.Table.Where(a => a.Authors.Any(a => a.Author.UserId == AuthorId));
+        }
+        else
+        {
+            query = articleService.Table;
+        }
+        await LoadArticles();
+    }    
     async Task GoToPage(int pageNumber)
     {
         if (pageNumber == pageModel?.PageNumber || pageNumber == 0 || pageNumber>pageModel?.TotalPages)
@@ -151,22 +168,17 @@
         try
         {
             preloadService.Show(SpinnerColor.Warning);
-            var pageRequest = new PageRequest(page, size);
             if (search && query == null)
             {
                 throw new Exception("Search without parameters is not supported.");
-            }
-            else
-            {
-                pageModel = await (query ??= articleService.Table).GetPageAsync(pageRequest);
-            }
-
+            }           
+            var pageRequest = new PageRequest(page, size);
+            pageModel = await (query ??= articleService.Table).GetPageAsync(pageRequest);
             await InvokeAsync(StateHasChanged);
         }
-        catch (Exception)
+        catch (Exception e)
         {
-
-            throw;
+            Console.WriteLine(e.Message + e.StackTrace);
         }
         finally
         {
@@ -208,7 +220,7 @@
         else if (!string.IsNullOrWhiteSpace(searchModel.SearchText) && searchModel.Advanced)
         {
 
-            query = articleService.Table.Where(a => a.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+            query = query.Where(a => a.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
                                        a.Description.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
                                        a.Authors.Any(a => a.Author.Name.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
                                        a.Authors.Any(a => a.Author.EmailAddress.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
@@ -220,7 +232,7 @@
         }
         else if (!string.IsNullOrWhiteSpace(searchModel.SearchText))
         {
-            query = articleService.Table.Where(a => a.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+            query = query.Where(a => a.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
                                            a.Description.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
                                            a.Authors.Any(a => a.Author.Name.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
                                            a.Authors.Any(a => a.Author.EmailAddress.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)));
@@ -228,7 +240,7 @@
         }
         else if (searchModel.Advanced)
         {
-            query = articleService.Table.Where(a => a.Type == searchModel.Type ||
+            query = query.Where(a => a.Type == searchModel.Type ||
                                            a.DatePublished >= searchModel.StartDate.ToDateTime(new TimeOnly(0, 0, 0)) &&
                                            a.DatePublished <= searchModel.EndDate.ToDateTime(new TimeOnly(0, 0, 0)));
             await LoadArticles(search: true);

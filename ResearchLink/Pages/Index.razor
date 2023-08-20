@@ -90,15 +90,15 @@
                 <nav aria-label="Page navigation">
                     <ul class="pagination justify-content-center">
                         <li class='@(pageModel.PageNumber == 1?"page-item disabled":"page-item")'>
-                            <button @onclick="()=>GoToPage(pageModel.PageNumber-1)" class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</button>
+                            <button disabled="@(pageModel.PageNumber == 1)" @onclick="()=>GoToPage(pageModel.PageNumber-1)" class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</button>
                         </li>
                         @for(int i = 1; i <= pageModel.TotalPages; i++)
                         {
                             var pageItem = new PageItem(i, pageModel.PageNumber == i);
-                            <li class='@pageItem.Active?"page-item active":"page-item")'><button @onclick="()=>GoToPage(pageItem.PageNumber)" class="page-link">@i</button></li>
+                            <li class='@(pageItem.Active?"page-item active":"page-item")'><button @onclick="()=>GoToPage(pageItem.PageNumber)" class="page-link">@i</button></li>
                         }
                         <li  class='@(pageModel.PageNumber == pageModel.TotalPages?"page-item disabled":"page-item")'>
-                            <button @onclick="()=>GoToPage(pageModel.PageNumber+1)" class="page-link">Next</button>
+                            <button disabled="@(pageModel.PageNumber == pageModel.TotalPages)" @onclick="()=>GoToPage(pageModel.PageNumber+1)" class="page-link">Next</button>
                         </li>
                     </ul>
                 </nav>
@@ -127,7 +127,7 @@
     }
     async Task GoToPage(int pageNumber)
     {   
-        if(pageNumber == pageModel?.PageNumber || pageNumber == 0)
+        if(pageNumber == pageModel?.PageNumber || pageNumber == 0 || pageNumber>pageModel?.TotalPages)
             return;
         await LoadArticles(pageNumber); 
     }

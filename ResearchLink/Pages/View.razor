@@ -1,6 +1,12 @@
 ﻿@page "/research"
 <div class="container mt-5">
-    @if (Model != null)
+    @if (Model is null)
+    {
+        <div class="d-flex align-items-center justify-content-center">
+            <h6 class="text-primary">Loading ...</h6>
+        </div>
+    }
+    else
     {
         <Card>
             <CardHeader>
@@ -91,7 +97,7 @@
                                         @if (item.Replying)
                                         {
                                             <h6>Leave a Reply</h6>
-                                            <EditForm Model="@commentReply" OnValidSubmit="@(async ()=> await AddReply(item))">
+                                            <EditForm Model="@commentReply" OnValidSubmit="@(()=> AddReply(item))">
                                                 <DataAnnotationsValidator />
                                                 <div class="mb-3">
                                                     <label for='@($"reply-{item.Id.ToString().Substring(0,8)}")' class="form-label">Reply</label>
@@ -106,7 +112,7 @@
                                             <Button Style="btn-link" @onclick="()=>InitReply(item)" class="reply-link">Reply</Button>
                                         }
                                         <!-- Replies -->
-                                        @if (item.Replies != null)
+                                        @if (item.Replies.Any())
                                         {
                                             foreach (var reply in item.Replies)
                                             {
@@ -159,12 +165,6 @@
          </FooterTemplate>
      </Modal>
     }
-    else
-    {
-        <div class="d-flex align-items-center justify-content-center">
-            <h6 class="text-primary">Loading ...</h6>
-        </div>
-    }
 </div>
 
 @code {
@@ -177,7 +177,7 @@
     [CascadingParameter]
     Task<AuthenticationState> AuthenticationStateTask { get; set; }
     Comment commentModel;
-    CommentReply commentReply = new CommentReply();
+    CommentReply commentReply;
     ClaimsPrincipal? currentUser;
     bool savingData;
     async Task<string> GetUserName(Guid? userId)
@@ -195,17 +195,17 @@
     }
     protected override async Task OnInitializedAsync()
     {
+        currentUser = (await AuthenticationStateTask).User;
         await ReloadData();
+        StateHasChanged();
     }
     async Task ReloadData()
     {
-        commentModel = InitComment();
-        commentReply = new CommentReply();
+
         Model = await articleService.Table
                                     .Include(a => a.Volume)
                                     .ThenInclude(v => v.Journal)
-                                    .FirstOrDefaultAsync(x => x.Id==Id);
-        currentUser = (await AuthenticationStateTask).User;
+                                    .FirstOrDefaultAsync(x => x.Id==Id);       
         if (Model != null && currentUser?.Identity != null && currentUser.Identity.IsAuthenticated)
         {
             isMyResearch = Model.Authors.Any(a => a.Author.UserId == currentUser.GetUserId());
@@ -214,8 +214,9 @@
         {
             Model.Comments ??= new List<Comment>();
         }
-       await InvokeAsync(StateHasChanged);
-
+        commentModel = InitComment();
+        commentReply = new CommentReply();
+        StateHasChanged();
     }
     async Task DownloadPaper()
     {
@@ -228,6 +229,7 @@
         {
             comment.UserId = currentUser.GetUserId();
         }
+        comment.ArticleId = Model.Id;
         return comment;
     }
     void InitReply(Comment comment)
@@ -239,10 +241,9 @@
         }
         comment.Replying = true;
     }
-    async Task AddComment()
+    async void AddComment()
     {
-        savingData = true;
-        commentModel.ArticleId = Model.Id;
+        savingData = true;        
         var save = commentService.Save(commentModel);
         if (save.Succeded)
         {
@@ -254,7 +255,7 @@
         }
         savingData = false;
     }
-    async Task AddReply(Comment comment)
+    async void AddReply(Comment comment)
     {
         savingData = true;
         comment.Replies ??= new List<CommentReply>();

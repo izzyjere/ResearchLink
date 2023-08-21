@@ -35,13 +35,11 @@ internal abstract class ServiceBase<TEntity> : IServiceBase<TEntity> where TEnti
         try
         {
             if (entity.Id == Guid.Empty)
-            {
-                entity.CreatedDate = DateTime.Now;
+            {                   
                 _context.Set<TEntity>().Add(entity);
             }
             else
-            {
-                entity.UpdatedDate = DateTime.Now;
+            {                  
                 _context.Set<TEntity>().Update(entity);
             }
 

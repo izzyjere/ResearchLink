@@ -75,6 +75,47 @@
                             </ul>
                         </div>
                     </div>
+                    <div class="col-12">
+                        <!-- Comments Section -->
+                        <div class="mt-4">
+                            <h2>Comments</h2>
+                            @if (Model.Comments.Any())
+                            {
+                                foreach (var item in Model.Comments)
+                                {
+                                    <div class="comment">
+                                        <div class="mb-2">
+                                            <strong>@GetUserName(item.UserId).Result</strong> - <small>Posted: @item.CreatedDate.Humanize(false)</small>
+                                        </div>
+                                        <p>@item.Content</p>
+                                        <a href="#" class="reply-link">Reply</a>
+
+                                        <!-- Replies -->
+                                        <div class="ml-4 reply">
+                                            <div class="mb-2">
+                                                <strong>ReplyUsername</strong> - <small>Posted on: 2023-08-22</small>
+                                            </div>
+                                            <p>Reply text goes here...</p>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+
+                        <!-- Comment Form -->
+                        <div class="mt-5 comment-form">
+                            <h2>Leave a Comment</h2>
+                            <EditForm Model="@commentModel" OnValidSubmit="AddComment"> 
+                                <DataAnnotationsValidator/>
+                                <div class="mb-3">
+                                    <label for="comment" class="form-label">Comment</label>
+                                    <InputTextArea @bind-Value="@commentModel.Content" class="form-control" id="comment" rows="4" required></InputTextArea>
+                                    <ValidationMessage For="()=>commentModel.Content"/>
+                                </div>
+                                <Button Loading="@savingData" LoadingText="Saving.." Type="ButtonType.Submit" Color="ButtonColor.Primary">Submit</Button>
+                            </EditForm>
+                        </div>
+                    </div>
                 </div>
             </CardBody>
             <CardFooter>
@@ -112,21 +153,72 @@
     bool isMyResearch;
     [CascadingParameter]
     Task<AuthenticationState> AuthenticationStateTask { get; set; }
+    Comment commentModel;
+    CommentReply commentReply = new CommentReply();
+    ClaimsPrincipal? currentUser;
+    bool savingData;
+    async Task<string> GetUserName(Guid? userId)
+    {   
+        if(userId == null || userId == Guid.Empty)
+        {
+            return "Annonymous";
+        }
+        var user = await userService.GetByIdAsync(userId.Value.ToString());
+        if(user is null)
+        {
+            return "Annonymous";
+        }
+        return $"{user.Profile?.FirstName} {user.Profile?.LastName}";
+    }
     protected override async Task OnInitializedAsync()
     {
+        await ReloadData();
+    }
+    async Task ReloadData()
+    {
+        commentModel = InitComment();
         Model = await articleService.Table
                                     .Include(a => a.Volume)
                                     .ThenInclude(v => v.Journal)
                                     .FirstOrDefaultAsync(x => x.Id==Id);
-        var currentUser = (await AuthenticationStateTask).User;
+        currentUser = (await AuthenticationStateTask).User;
         if (Model != null && currentUser?.Identity != null && currentUser.Identity.IsAuthenticated)
         {
             isMyResearch = Model.Authors.Any(a => a.Author.UserId == currentUser.GetUserId());
         }
+        if (Model != null)
+        {
+            Model.Comments ??= new List<Comment>();
+        }
         StateHasChanged();
+
     }
     async Task DownloadPaper()
     {
-        await javaScriptRuntime.InvokeVoidAsync("downloadFile", new { blob= fileSystemHelper.ReadAsBlob(Model.Document) ,fileName = $"link_{Model.Title.Replace(" ", "_").Substring(0, 10)}.pdf" });
+        await javaScriptRuntime.InvokeVoidAsync("downloadFile", new { blob = fileSystemHelper.ReadAsBlob(Model.Document), fileName = $"link_{Model.Title.Replace(" ", "_").Substring(0, 10)}.pdf" });
+    }
+    Comment InitComment()
+    {
+        var comment = new Comment();
+        if(currentUser?.Identity != null && currentUser.Identity.IsAuthenticated)
+        {
+            comment.UserId = currentUser.GetUserId();
+        }
+        return comment;
+    }
+    async Task AddComment()
+    {
+        savingData = true;
+        commentModel.ArticleId = Model.Id;
+        var save = commentService.Save(commentModel);
+        if (save.Succeded)
+        {
+            await ReloadData();
+        }
+        else
+        {
+            toastService.Notify(new ToastMessage(ToastType.Danger,"Failed to save comment try again."));
+        }
+        savingData = false;
     }
 }

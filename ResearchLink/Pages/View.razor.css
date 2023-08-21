@@ -8,3 +8,39 @@
 .text-bold{
     font-weight:bold;
 }
+/* Custom Styles */
+.comment {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+    .comment strong {
+        font-size: 1.2em;
+    }
+
+.reply {
+    border: 1px solid #e5e5e5;
+    border-radius: 5px;
+    padding: 8px 15px;
+    margin-top: 10px;
+    background-color: #f9f9f9;
+}
+
+    .reply strong {
+        font-size: 1em;
+    }
+
+.reply-link {
+    color: #007bff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.comment-form {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 15px;
+    margin-top: 30px;
+}

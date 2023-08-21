@@ -35,6 +35,14 @@ public class DatabaseContext : DbContext
                av.ToTable("ArticleDocuments");               
                av.WithOwner();
            });
+        modelBuilder.Entity<Comment>(comment =>
+        {
+           comment.OwnsMany(c => c.Replies, reply =>
+           {
+               reply.ToTable("CommentReplies");
+               reply.WithOwner(r=>r.Comment);
+           });
+        });
         foreach (var entityType in entityTypes)
         {
             var entity = modelBuilder.Entity(entityType);

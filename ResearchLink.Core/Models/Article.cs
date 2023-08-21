@@ -21,5 +21,6 @@ public class Article  : Entity
     [Range(1, 4, ErrorMessage = "Please select a research type")]
     public ResearchType Type { get; set; }
     public FileModel Document { get; set; }
+    public ICollection<Comment> Comments { get; set; }
 }
 

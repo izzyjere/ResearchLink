@@ -91,7 +91,7 @@
                                         @if (item.Replying)
                                         {
                                             <h6>Leave a Reply</h6>
-                                            <EditForm Model="@commentReply" OnValidSubmit="()=>AddReply(item)">
+                                            <EditForm Model="@commentReply" OnValidSubmit="@(async ()=> await AddReply(item))">
                                                 <DataAnnotationsValidator />
                                                 <div class="mb-3">
                                                     <label for='@($"reply-{item.Id.ToString().Substring(0,8)}")' class="form-label">Reply</label>
@@ -162,7 +162,7 @@
     else
     {
         <div class="d-flex align-items-center justify-content-center">
-            <h6 class="text-primary"></h6>
+            <h6 class="text-primary">Loading ...</h6>
         </div>
     }
 </div>
@@ -214,7 +214,7 @@
         {
             Model.Comments ??= new List<Comment>();
         }
-        StateHasChanged();
+       await InvokeAsync(StateHasChanged);
 
     }
     async Task DownloadPaper()

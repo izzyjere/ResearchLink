@@ -8,7 +8,7 @@ namespace ResearchLink.Core.Models
         [Required(ErrorMessage = "Please provide a comment")]
         [MaxLength(250,ErrorMessage = "Comment cannot be more than 250 characters")]
         public string Content { get; set; }
-        public Guid? UserId { get; set; }
+        public string User { get; set; }
         public Article Article { get; set; }
         public ICollection<CommentReply> Replies { get; set; }
         [NotMapped]

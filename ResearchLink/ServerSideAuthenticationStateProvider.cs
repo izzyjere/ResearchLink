@@ -69,5 +69,21 @@ namespace ResearchLink
             }
         }
     }
+    internal class ClaimsPrincipalFactory : UserClaimsPrincipalFactory<User, Role>
+    {
+        public ClaimsPrincipalFactory(
+                       UserManager<User> userManager,
+                                  RoleManager<Role> roleManager,
+                                             IOptions<IdentityOptions> optionsAccessor)
+            : base(userManager, roleManager, optionsAccessor)
+        {
+        }
+        protected override async Task<ClaimsIdentity> GenerateClaimsAsync(User user)
+        {
+            var identity = await base.GenerateClaimsAsync(user);
+            identity.AddClaim(new Claim("FullName", $"{user?.Profile?.FirstName} {user?.Profile?.LastName}"));
+            return identity;
+        }
+    }   
 }
 

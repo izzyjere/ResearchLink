@@ -1,5 +1,7 @@
 using Hangfire;
 
+using ResearchLink;
+
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("Default");
 // Add services to the container.
@@ -18,6 +20,7 @@ builder.Services.AddHangfire(t =>
 builder.Services.AddHangfireServer();
 builder.Services.AddHangfireServer();
 builder.Services.AddScoped<AuthenticationStateProvider,ServerAuthenticationStateProvider>();
+builder.Services.AddScoped<IUserClaimsPrincipalFactory<User>, ClaimsPrincipalFactory>();
 
 var app = builder.Build();
 

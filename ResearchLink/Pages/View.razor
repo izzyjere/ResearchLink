@@ -1,4 +1,5 @@
 ﻿@page "/research"
+@using System.Globalization;
 <div class="container mt-5">
     @if (Model is null)
     {
@@ -91,9 +92,9 @@
                                 {
                                     <div class="comment">
                                         <div class="mb-2">
-                                            <strong>@GetUserName(item.UserId).Result</strong> - <small class="text-info">Posted: @item.CreatedDate.Humanize(false)</small>
+                                            <strong>@item.User</strong> - <small class="text-info">Posted: @item.CreatedDate.Humanize(false)</small>
                                         </div>
-                                        <p>@item.Content</p>
+                                        <p class="commentContent">@ConvertUnicodeToEmoji(item.Content)</p>
                                         @if (item.Replying)
                                         {
                                             <h6>Leave a Reply</h6>
@@ -109,23 +110,21 @@
                                         }
                                         else
                                         {
-                                            <Button Style="btn-link" @onclick="()=>InitReply(item)" class="reply-link">Reply</Button>
+                                            <Button Color="ButtonColor.Link" Style="btn-link" @onclick="()=>InitReply(item)" class="reply-link">Reply</Button>
                                         }
                                         <!-- Replies -->
-                                        @if (item.Replies.Any())
+                                        @if (item.Replies !=null && item.Replies.Any())
                                         {
                                             foreach (var reply in item.Replies)
                                             {
                                                 <div class="ml-4 reply">
                                                     <div class="mb-2">
-                                                        <strong>@GetUserName(reply.UserId).Result</strong> - <small class="text-info">Replied: @reply.CreatedDate.Humanize(false)</small>
+                                                        <strong>@reply.User</strong> - <small class="text-info">Replied: @reply.CreatedDate.Humanize(false)</small>
                                                     </div>
-                                                    <p>Reply text goes here...</p>
+                                                    <p class="commentContent">@ConvertUnicodeToEmoji(reply.Content)</p>
                                                 </div>
                                             }
                                         }
-
-
                                     </div>
                                 }
                             }
@@ -180,32 +179,21 @@
     CommentReply commentReply;
     ClaimsPrincipal? currentUser;
     bool savingData;
-    async Task<string> GetUserName(Guid? userId)
-    {
-        if (userId == null || userId == Guid.Empty)
-        {
-            return "Annonymous";
-        }
-        var user = await userService.GetByIdAsync(userId.Value.ToString());
-        if (user is null)
-        {
-            return "Annonymous";
-        }
-        return $"{user.Profile?.FirstName} {user.Profile?.LastName}";
-    }
+
     protected override async Task OnInitializedAsync()
     {
         currentUser = (await AuthenticationStateTask).User;
-        await ReloadData();
-        StateHasChanged();
+        await ReloadData();    
     }
     async Task ReloadData()
     {
 
-        Model = await articleService.Table
-                                    .Include(a => a.Volume)
-                                    .ThenInclude(v => v.Journal)
-                                    .FirstOrDefaultAsync(x => x.Id==Id);       
+        Model = articleService.Get(Id);    
+        if(Model is null)
+        {
+            Navigation.NavigateTo("/", true);
+            return;
+        }
         if (Model != null && currentUser?.Identity != null && currentUser.Identity.IsAuthenticated)
         {
             isMyResearch = Model.Authors.Any(a => a.Author.UserId == currentUser.GetUserId());
@@ -216,7 +204,7 @@
         }
         commentModel = InitComment();
         commentReply = new CommentReply();
-        StateHasChanged();
+        await InvokeAsync(StateHasChanged);
     }
     async Task DownloadPaper()
     {
@@ -227,7 +215,11 @@
         var comment = new Comment();
         if (currentUser?.Identity != null && currentUser.Identity.IsAuthenticated)
         {
-            comment.UserId = currentUser.GetUserId();
+            comment.User = currentUser.GetFullName();
+        }
+        else
+        {
+            comment.User = "Anonymous"; 
         }
         comment.ArticleId = Model.Id;
         return comment;
@@ -237,13 +229,18 @@
         commentReply = new CommentReply();
         if (currentUser?.Identity != null && currentUser.Identity.IsAuthenticated)
         {
-            commentReply.UserId = currentUser.GetUserId();
+            commentReply.User = currentUser.GetFullName();
+        }
+        else
+        {
+            commentReply.User = "Anonymous";
         }
         comment.Replying = true;
     }
     async void AddComment()
     {
-        savingData = true;        
+        savingData = true;  
+        commentModel.Content = EncodeEmojis(commentModel.Content);
         var save = commentService.Save(commentModel);
         if (save.Succeded)
         {
@@ -258,6 +255,8 @@
     async void AddReply(Comment comment)
     {
         savingData = true;
+        commentReply.Content = EncodeEmojis(commentReply.Content);
+        commentReply.CreatedDate = DateTime.Now;
         comment.Replies ??= new List<CommentReply>();
         comment.Replies.Add(commentReply);
         var save = commentService.Save(comment);
@@ -271,5 +270,26 @@
         }
         savingData = false;
 
+    }
+    string EncodeEmojis(string text)
+    {
+        return string.Join("", text.Select(c => c < 128 ? c.ToString() : $"\\u{(int)c:X4}"));
+    }
+    private string ConvertUnicodeToEmoji(string encodedText)
+    {
+        var decodedText = Regex.Replace(encodedText, @"\\u(?<Value>[a-zA-Z0-9]{4})", m =>
+        {
+            var utf32 = int.Parse(m.Groups["Value"].Value, NumberStyles.HexNumber);
+            if (utf32 > 0xFFFF)
+            {
+                // Handle surrogate pairs for emojis outside the BMP
+                return char.ConvertFromUtf32(utf32);
+            }
+            else
+            {
+                return ((char)utf32).ToString();
+            }
+        });
+        return decodedText;
     }
 }

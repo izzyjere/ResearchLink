@@ -32,14 +32,7 @@
                     <Authorized>
                         <div class="user-profile me-3 dropdown-toggle" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             <img width="20" height="20" style="object-fit:cover !important" src="@avatarBlob" alt="User Profile" class="img-fluid">
-                            @if (CurrentUser?.Profile != null)
-                            {
-                                <span class="navbar-text">@CurrentUser.Profile.FirstName @CurrentUser.Profile.LastName</span>
-                            }
-                            else
-                            {
-                                <span>Loading..</span>
-                            }
+                            <span class="navbar-text">@context.User.GetFullName()</span>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" @onclick='()=>Navigation.NavigateTo("profile",true)' href="">Profile</a></li>
                                 <li><hr class="dropdown-divider"></li>
@@ -62,19 +55,17 @@
     [CascadingParameter]
     Task<AuthenticationState> authenticationStateTask { get; set; }
     ClaimsPrincipal? claimsPrincipal { get; set; }
-    [CascadingParameter]
-    UserProxy? CurrentUser { get; set; }
     string? avatarBlob;
     protected override async Task OnInitializedAsync()
     {
         claimsPrincipal = (await authenticationStateTask).User;
         if (claimsPrincipal != null && claimsPrincipal.Identity.IsAuthenticated)
         {
-            var avatar = authorService.Table                                             
+            var avatar = authorService.Table
                                              .FirstOrDefault(x => x.UserId==claimsPrincipal.GetUserId());
-            if(avatar != null)
+            if (avatar != null)
             {
-                if(avatar.HasAvatar)
+                if (avatar.HasAvatar)
                 {
                     avatarBlob = fileSystemHelper.ReadAsBlob(avatar.Avatar);
                 }

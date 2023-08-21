@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 <PageTitle>Reasearch Social  Network</PageTitle>
-<CascadingValue TValue="UserProxy" Value="@CurrentUser">
+
     <div class="page">
         <header>
             <NavBar />
@@ -9,13 +9,5 @@
             @Body
         </main>
     </div>
-</CascadingValue>
-<Toasts class="p-3" AutoHide Delay="5000" Placement="ToastsPlacement.TopRight" />
 
-@code {
-    public UserProxy? CurrentUser { get; set; }
-    protected override async Task OnInitializedAsync()
-    {
-        CurrentUser = await userService.GetCurrentUserAsync();
-    }
-}
+<Toasts class="p-3" AutoHide Delay="5000" Placement="ToastsPlacement.TopRight" />

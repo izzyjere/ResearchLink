@@ -44,6 +44,7 @@ public static class Extensions
         };
     }
     public static Guid GetUserId(this ClaimsPrincipal claimsPrincipal) => Guid.Parse(claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier));
+    public static string GetFullName(this ClaimsPrincipal claimsPrincipal) => claimsPrincipal.FindFirstValue("FullName");
     //Read Description attribute from enum
     public static string GetDescription(this Enum value)
     {

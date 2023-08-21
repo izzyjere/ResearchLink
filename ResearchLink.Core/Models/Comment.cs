@@ -1,4 +1,6 @@
-﻿namespace ResearchLink.Core.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace ResearchLink.Core.Models
 {
     public class Comment : Entity
     {
@@ -9,5 +11,7 @@
         public Guid? UserId { get; set; }
         public Article Article { get; set; }
         public ICollection<CommentReply> Replies { get; set; }
+        [NotMapped]
+        public bool Replying { get; set; }  
     }
 }

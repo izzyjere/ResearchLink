@@ -8,5 +8,6 @@
         public string Content { get; set; }
         public Guid? UserId { get; set; }
         public Comment Comment { get; set; }
+        public DateTime CreatedDate { get; set; }
     }   
 }

@@ -85,18 +85,41 @@
                                 {
                                     <div class="comment">
                                         <div class="mb-2">
-                                            <strong>@GetUserName(item.UserId).Result</strong> - <small>Posted: @item.CreatedDate.Humanize(false)</small>
+                                            <strong>@GetUserName(item.UserId).Result</strong> - <small class="text-info">Posted: @item.CreatedDate.Humanize(false)</small>
                                         </div>
                                         <p>@item.Content</p>
-                                        <a href="#" class="reply-link">Reply</a>
-
+                                        @if (item.Replying)
+                                        {
+                                            <h6>Leave a Reply</h6>
+                                            <EditForm Model="@commentReply" OnValidSubmit="()=>AddReply(item)">
+                                                <DataAnnotationsValidator />
+                                                <div class="mb-3">
+                                                    <label for='@($"reply-{item.Id.ToString().Substring(0,8)}")' class="form-label">Reply</label>
+                                                    <InputTextArea @bind-Value="@commentReply.Content" class="form-control" id='@($"reply-{item.Id.ToString().Substring(0,8)}")' rows="4"></InputTextArea>
+                                                    <ValidationMessage For="()=>commentReply.Content" />
+                                                </div>
+                                                <Button Loading="@savingData" LoadingText="Saving.." Type="ButtonType.Submit" Color="ButtonColor.Primary">Submit</Button>
+                                            </EditForm>
+                                        }
+                                        else
+                                        {
+                                            <Button Style="btn-link" @onclick="()=>InitReply(item)" class="reply-link">Reply</Button>
+                                        }
                                         <!-- Replies -->
-                                        <div class="ml-4 reply">
-                                            <div class="mb-2">
-                                                <strong>ReplyUsername</strong> - <small>Posted on: 2023-08-22</small>
-                                            </div>
-                                            <p>Reply text goes here...</p>
-                                        </div>
+                                        @if (item.Replies != null)
+                                        {
+                                            foreach (var reply in item.Replies)
+                                            {
+                                                <div class="ml-4 reply">
+                                                    <div class="mb-2">
+                                                        <strong>@GetUserName(reply.UserId).Result</strong> - <small class="text-info">Replied: @reply.CreatedDate.Humanize(false)</small>
+                                                    </div>
+                                                    <p>Reply text goes here...</p>
+                                                </div>
+                                            }
+                                        }
+
+
                                     </div>
                                 }
                             }
@@ -105,12 +128,12 @@
                         <!-- Comment Form -->
                         <div class="mt-5 comment-form">
                             <h2>Leave a Comment</h2>
-                            <EditForm Model="@commentModel" OnValidSubmit="AddComment"> 
-                                <DataAnnotationsValidator/>
+                            <EditForm Model="@commentModel" OnValidSubmit="AddComment">
+                                <DataAnnotationsValidator />
                                 <div class="mb-3">
                                     <label for="comment" class="form-label">Comment</label>
-                                    <InputTextArea @bind-Value="@commentModel.Content" class="form-control" id="comment" rows="4" required></InputTextArea>
-                                    <ValidationMessage For="()=>commentModel.Content"/>
+                                    <InputTextArea @bind-Value="@commentModel.Content" class="form-control" id="comment" rows="4"></InputTextArea>
+                                    <ValidationMessage For="()=>commentModel.Content" />
                                 </div>
                                 <Button Loading="@savingData" LoadingText="Saving.." Type="ButtonType.Submit" Color="ButtonColor.Primary">Submit</Button>
                             </EditForm>
@@ -158,13 +181,13 @@
     ClaimsPrincipal? currentUser;
     bool savingData;
     async Task<string> GetUserName(Guid? userId)
-    {   
-        if(userId == null || userId == Guid.Empty)
+    {
+        if (userId == null || userId == Guid.Empty)
         {
             return "Annonymous";
         }
         var user = await userService.GetByIdAsync(userId.Value.ToString());
-        if(user is null)
+        if (user is null)
         {
             return "Annonymous";
         }
@@ -177,6 +200,7 @@
     async Task ReloadData()
     {
         commentModel = InitComment();
+        commentReply = new CommentReply();
         Model = await articleService.Table
                                     .Include(a => a.Volume)
                                     .ThenInclude(v => v.Journal)
@@ -200,11 +224,20 @@
     Comment InitComment()
     {
         var comment = new Comment();
-        if(currentUser?.Identity != null && currentUser.Identity.IsAuthenticated)
+        if (currentUser?.Identity != null && currentUser.Identity.IsAuthenticated)
         {
             comment.UserId = currentUser.GetUserId();
         }
         return comment;
+    }
+    void InitReply(Comment comment)
+    {
+        commentReply = new CommentReply();
+        if (currentUser?.Identity != null && currentUser.Identity.IsAuthenticated)
+        {
+            commentReply.UserId = currentUser.GetUserId();
+        }
+        comment.Replying = true;
     }
     async Task AddComment()
     {
@@ -217,8 +250,25 @@
         }
         else
         {
-            toastService.Notify(new ToastMessage(ToastType.Danger,"Failed to save comment try again."));
+            toastService.Notify(new ToastMessage(ToastType.Danger, "Failed to save comment try again."));
         }
         savingData = false;
+    }
+    async Task AddReply(Comment comment)
+    {
+        savingData = true;
+        comment.Replies ??= new List<CommentReply>();
+        comment.Replies.Add(commentReply);
+        var save = commentService.Save(comment);
+        if (save.Succeded)
+        {
+            await ReloadData();
+        }
+        else
+        {
+            toastService.Notify(new ToastMessage(ToastType.Danger, "Failed to save reply try again."));
+        }
+        savingData = false;
+
     }
 }

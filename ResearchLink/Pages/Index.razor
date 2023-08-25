@@ -89,7 +89,7 @@
                                         @switch (item.Type)
                                         {
                                             case ResearchType.JournalArticle:
-                                                <p class="card-text">Published in: Journal of XYZ</p>
+                                                <p class="card-text">Published in: @item?.Volume?.Journal?.Name</p>
                                                 <p class="card-text">Volume: @item?.Volume?.Number pp: @item.Pages </p>
                                                 break;
                                             default:

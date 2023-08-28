@@ -17,7 +17,7 @@
                     </div>
                     @if (searchModel.Advanced)
                     {
-                        <div class="col-4">
+                       @*  <div class="col-4">
                             <label for="type">Research Type</label>
                             <InputSelect @bind-Value="@searchModel.Type" id="type" class="form-select">
                                 @foreach (ResearchType item in Enum.GetValues(typeof(ResearchType)))
@@ -25,7 +25,7 @@
                                     <option value="@item">@item.GetDescription()</option>
                                 }
                             </InputSelect>
-                        </div>
+                        </div> *@
                         <div class="col-4">
                             <label for="startDate">Published Date</label>
                             <DateInput @bind-Value="@searchModel.StartDate" TValue="DateOnly" ElementId="startDate"></DateInput>
@@ -85,20 +85,10 @@
                                     <div class="card-body">
                                         <h5 class="card-title">@item.Title</h5>
                                         <p class="card-text">Authors: @GetAuthorNames(item)</p>
-                                        <p class="card-text">Published: @item.DatePublished.Humanize(false)</p>
-                                        @switch (item.Type)
-                                        {
-                                            case ResearchType.JournalArticle:
-                                                <p class="card-text">Published in: Journal of XYZ</p>
-                                                <p class="card-text">Volume: @item?.Volume?.Number pp: @item.Pages </p>
-                                                break;
-                                            default:
-                                                <p class="card-text">Type: @item.Type.GetDescription()</p>
-                                                <p class="card-text">Publisher: @item.Publisher.Name</p>
-                                                break;
-                                        }
-
-                                        <p class="card-text">Abstract: @GetBiographyPreview(item.Description)</p>
+                                        <p class="card-text">Published: @item.DatePublished.Humanize(false)</p>                                        
+                                        <p class="card-text">Published in: @item.ResearchTopic.Title</p>                                       
+                                       
+                                        <p class="card-text">District: @item.District.Name</p> <p class="card-text">Abstract: @GetBiographyPreview(item.Description)</p>
                                         <a href="research?p=@(item.Id)" class="btn btn-primary"><i class="fas fa-file-alt"></i> View More</a>
                                         <button @onclick="()=>DownloadPaper(item)" class="btn btn-danger"><i class="fas fa-file-pdf"></i> Download PDF</button>
                                     </div>
@@ -133,23 +123,16 @@
     </div>
 </div>
 @code {
-    Page<Article>? pageModel;
+    Page<Research>? pageModel;
     SearchModel searchModel = new SearchModel();
-    IEnumerable<Article> articlesList = new List<Article>();
-    IQueryable<Article>? query = null;
-    [Parameter]
-    [SupplyParameterFromQuery(Name = "type")]
-    public int Type { get; set; }
+    IEnumerable<Research> articlesList = new List<Research>();
+    IQueryable<Research>? query = null;    
     [Parameter]
     [SupplyParameterFromQuery(Name = "author")]
     public Guid AuthorId { get; set; }
     protected override async void OnInitialized()
     {
-        if (Type > 0)
-        {
-            query = articleService.Table.Where(a => a.Type == (ResearchType)Type);
-        }
-        else if (AuthorId != Guid.Empty)
+        if (AuthorId != Guid.Empty)
         {
             query = articleService.Table.Where(a => a.Authors.Any(a => a.Author.UserId == AuthorId));
         }
@@ -157,15 +140,15 @@
         {
             query = articleService.Table;
         }
-        await LoadArticles();
+        await LoadResearchs();
     }    
     async Task GoToPage(int pageNumber)
     {
         if (pageNumber == pageModel?.PageNumber || pageNumber == 0 || pageNumber>pageModel?.TotalPages)
             return;
-        await LoadArticles(pageNumber);
+        await LoadResearchs(pageNumber);
     }
-    async Task LoadArticles(int page = 1, int size = 2, bool search = false)
+    async Task LoadResearchs(int page = 1, int size = 2, bool search = false)
     {
 
         try
@@ -189,7 +172,7 @@
         }
 
     }
-    MarkupString GetAuthorNames(Article article)
+    MarkupString GetAuthorNames(Research article)
     {
         var authors = article.Authors.Select(a => a.Author).ToList();
         var stringBuilder = new StringBuilder();
@@ -210,7 +193,7 @@
         var strippedBiography = Regex.Replace(biography, "<.*?>", string.Empty); // Remove HTML tags, if any
         return strippedBiography.Length > maxPreviewLength ? $"{strippedBiography.Substring(0, maxPreviewLength)}..." : strippedBiography;
     }
-    async Task DownloadPaper(Article model)
+    async Task DownloadPaper(Research model)
     {
         await javaScriptRuntime.InvokeVoidAsync("downloadFile", new { blob = fileSystemHelper.ReadAsBlob(model.Document), fileName = $"link_{model.Title.Replace(" ", "_").Substring(0, 10)}.pdf" });
     }
@@ -226,11 +209,10 @@
             query = query.Where(a => a.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
                                        a.Description.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
                                        a.Authors.Any(a => a.Author.Name.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
-                                       a.Authors.Any(a => a.Author.EmailAddress.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
-                                       a.Type == searchModel.Type ||
+                                       a.Authors.Any(a => a.Author.EmailAddress.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||                                      
                                        a.DatePublished >= searchModel.StartDate.ToDateTime(new TimeOnly(0, 0, 0)) &&
                                        a.DatePublished <= searchModel.EndDate.ToDateTime(new TimeOnly(0, 0, 0)));
-            await LoadArticles(search: true);
+            await LoadResearchs(search: true);
 
         }
         else if (!string.IsNullOrWhiteSpace(searchModel.SearchText))
@@ -239,22 +221,20 @@
                                            a.Description.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
                                            a.Authors.Any(a => a.Author.Name.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
                                            a.Authors.Any(a => a.Author.EmailAddress.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)));
-            await LoadArticles(search: true);
+            await LoadResearchs(search: true);
         }
         else if (searchModel.Advanced)
         {
-            query = query.Where(a => a.Type == searchModel.Type ||
-                                           a.DatePublished >= searchModel.StartDate.ToDateTime(new TimeOnly(0, 0, 0)) &&
+            query = query.Where(a =>       a.DatePublished >= searchModel.StartDate.ToDateTime(new TimeOnly(0, 0, 0)) &&
                                            a.DatePublished <= searchModel.EndDate.ToDateTime(new TimeOnly(0, 0, 0)));
-            await LoadArticles(search: true);
+            await LoadResearchs(search: true);
         }
 
     }
 
     class SearchModel
     {
-        public string? SearchText { get; set; }
-        public ResearchType Type { get; set; }
+        public string? SearchText { get; set; }        
         public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
         public DateOnly EndDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
         public bool Advanced { get; set; }

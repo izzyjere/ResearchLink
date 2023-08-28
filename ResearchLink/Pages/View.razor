@@ -25,7 +25,7 @@
                                 Published : <span class="text-info">@Model.DatePublished.Humanize(false)</span>
                             </div>
                             <div class="col-6 col-xs-12">
-                                Publisher : <span class="text-info">@Model.Publisher.Name</span>
+                                District : <span class="text-info">@Model.District.Name</span>
                             </div>
                         </div>
                         <hr />
@@ -39,11 +39,11 @@
                                     <td class="text-bold">Type</td>
                                     <td>@Model.Type.GetDescription()</td>
                                 </tr>
-                                @if (Model.Type==ResearchType.JournalArticle)
+                                @if (Model.Type==ResearchType.ResearchTopicResearch)
                                 {
                                     <tr>
                                         <td class="text-bold">Published In:</td>
-                                        <td>@Model?.Volume?.Journal?.Name</td>
+                                        <td>@Model?.Volume?.ResearchTopic?.Name</td>
                                     </tr>
                                     <tr>
                                         <td class="text-bold">Volume:</td>
@@ -170,7 +170,7 @@
     [Parameter]
     [SupplyParameterFromQuery(Name = "p")]
     public Guid Id { get; set; }
-    Article? Model { get; set; }
+    Research? Model { get; set; }
     Modal viewDocModal;
     bool isMyResearch;
     [CascadingParameter]
@@ -221,7 +221,7 @@
         {
             comment.User = "Anonymous"; 
         }
-        comment.ArticleId = Model.Id;
+        comment.ResearchId = Model.Id;
         return comment;
     }
     void InitReply(Comment comment)

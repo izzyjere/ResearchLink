@@ -12,7 +12,7 @@ public class Author : Entity
     public string Biography { get; set; }   
     public string EmailAddress { get; set; }
     public DateTime DateJoined { get; set; }
-    public List<AuthorArticle> Articles { get; set; }
+    public List<AuthorResearch> Researchs { get; set; }
     public Guid UserId { get; set; }
     public string? Affliation { get; set; }
     public FileModel? Avatar { get; set; }

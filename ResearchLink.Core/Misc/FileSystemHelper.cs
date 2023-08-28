@@ -45,7 +45,7 @@ namespace ResearchLink.Core.Misc
         bool FileIsCleanable(string fileName)
         {
             var filePresent = _databaseContext.Set<Author>().Select(a=>a.Avatar).Any(f=>f.FileName==fileName);
-            var filePresent2 = _databaseContext.Set<Article>().Select(a=>a.Document).Any(f=>f.FileName==fileName);
+            var filePresent2 = _databaseContext.Set<Research>().Select(a=>a.Document).Any(f=>f.FileName==fileName);
            return !filePresent && !filePresent2;
         }   
         public async Task RunFileStoreCleanUp()

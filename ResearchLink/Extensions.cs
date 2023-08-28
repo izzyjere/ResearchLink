@@ -2,7 +2,6 @@
 using Hangfire;
 using ResearchLink.Core.Misc;
 using System.ComponentModel;
-using ResearchLink.Core.Services;
 using Microsoft.JSInterop;
 
 public static class Extensions

@@ -262,6 +262,7 @@
         var save = commentService.Save(comment);
         if (save.Succeded)
         {
+            comment.Replying = false;
             await ReloadData();
         }
         else

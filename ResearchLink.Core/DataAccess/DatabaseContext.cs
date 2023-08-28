@@ -27,7 +27,7 @@ public class DatabaseContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
          var entityTypes = typeof(Document).Assembly.GetTypes()
-         .Where(t => typeof(IEntity).IsAssignableFrom(t) && t != typeof(IEntity) && !t.IsAbstract && !t.IsInterface && t!=typeof(Citation));
+         .Where(t => typeof(IEntity).IsAssignableFrom(t) && t != typeof(IEntity) && !t.IsAbstract && !t.IsInterface);
         modelBuilder.Entity<Author>()
            .OwnsOne(a => a.Avatar, av =>
            {

@@ -18,18 +18,7 @@ public static class Extensions
         }
         RecurringJob.AddOrUpdate("FileStore_Cleaner", () => service.RunFileStoreCleanUp(), "0 * * * *");
         return app;
-    } 
-    internal static IApplicationBuilder InitVolumeGenerator(this IApplicationBuilder app)
-    {
-        var scope = app.ApplicationServices.CreateScope();
-        var service = scope.ServiceProvider.GetService<IVolumeGenerationConfigurationService>();
-        if (service == null)
-        {
-            throw new Exception("Some services are missing: Name{IVolumeGenerationConfigurationService}");
-        }
-        RecurringJob.AddOrUpdate("Volume_Generator", () => service.ExecuteAutomaticVolumeGenerationJob(), "0 0 15 * *");
-        return app;
-    }
+    }     
     public static Author CreateAuthorFromUser(this UserProxy user)
     {   if (user.Profile == null) throw new ArgumentNullException(nameof(user.Profile));
         return new Author

@@ -35,25 +35,21 @@
                                     <col width="40%" />
                                     <col width="60%" />
                                 </colgroup>
-                                <tr>
-                                    <td class="text-bold">Type</td>
-                                    <td>@Model.Type.GetDescription()</td>
-                                </tr>
-                                @if (Model.Type==ResearchType.ResearchTopicResearch)
-                                {
+                                
+                                
                                     <tr>
                                         <td class="text-bold">Published In:</td>
-                                        <td>@Model?.Volume?.ResearchTopic?.Name</td>
+                                        <td>@Model?.ResearchTopic?.Title</td>
                                     </tr>
                                     <tr>
-                                        <td class="text-bold">Volume:</td>
-                                        <td>@Model?.Volume?.Number</td>
+                                        <td class="text-bold">District:</td>
+                                        <td>@Model?.District?.Name</td>
                                     </tr>
                                     <tr>
-                                        <td class="text-bold">Pages:</td>
-                                        <td>@Model?.Pages</td>
+                                        <td class="text-bold">Province:</td>
+                                        <td>@Model?.District?.Province?.Name</td>
                                     </tr>
-                                }
+                               
                                 <tr>
                                     <td class="text-bold">Year:</td>
                                     <td>@Model?.Year</td>

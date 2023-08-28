@@ -18,8 +18,7 @@ builder.Services.AddHangfire(t =>
     t.UseSqlServerStorage(connectionString);
 });
 builder.Services.AddHangfireServer();
-builder.Services.AddHangfireServer();
-builder.Services.AddScoped<AuthenticationStateProvider,ServerAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
 builder.Services.AddScoped<IUserClaimsPrincipalFactory<User>, ClaimsPrincipalFactory>();
 
 var app = builder.Build();
@@ -44,5 +43,4 @@ app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 app.UseHangfireDashboard();
 app.InitFileStoreCleaner();
-app.InitVolumeGenerator();
 app.Run();

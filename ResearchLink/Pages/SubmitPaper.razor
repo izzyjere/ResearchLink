@@ -299,6 +299,7 @@
 @code {
     bool createNewDistrict, createNewResearchTopic;
     IEnumerable<District> districts = new List<District>();
+    IEnumerable<string> provinces = new List<string>();
     IEnumerable<ResearchTopic> researchTopics = new List<ResearchTopic>();
     Guid creatingGuid = Guid.NewGuid();
     string DistrictName { get; set; }
@@ -306,7 +307,6 @@
     string ResearchTopicDescription { get; set; }
     ResearchTopic? researchTopicModel;
     Guid researchTopicGuid { get => researchTopicModel == null ? creatingGuid : researchTopicModel.Id; }
-    Modal volumesModal;
     void OnDistrictChanged(Guid publisherId)
     {
 
@@ -343,6 +343,7 @@
     {
         districts = publisherService.Table.ToList();
         researchTopics = researchTopicService.Table.ToList();
+        provinces = districts.Select(d=> d.Province).Distinct().ToList();
     }
     bool processing;
     async void AddResearchTopic()
@@ -359,8 +360,7 @@
             researchTopicModel = researchTopics.FirstOrDefault(j => j.Title.Equals(ResearchTopicName, StringComparison.OrdinalIgnoreCase));
             ResearchTopicName = string.Empty;
             ResearchTopicDescription = string.Empty;
-            processing = false;
-            await volumesModal.HideAsync();
+            processing = false;           
             StateHasChanged();
         }
     }

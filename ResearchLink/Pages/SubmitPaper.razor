@@ -20,8 +20,8 @@
                             <div class="col-12">
                                 <div class="form-group">
                                     <label for="abstract">Abstract</label>
-                                    <InputTextArea placeholder="type or paste your abstract here." rows="25" style="max-height:65vh" class="form-control" id="abstract" @bind-Value="@Model.Description" />
-                                    <ValidationMessage For="()=>Model.Description" />
+                                    <InputTextArea placeholder="type or paste your abstract here." rows="25" style="max-height:65vh" class="form-control" id="abstract" @bind-Value="@Model.Abstract" />
+                                    <ValidationMessage For="()=>Model.Abstract" />
                                 </div>
                             </div>
                         </div>
@@ -70,13 +70,7 @@
                                         </InputSelect>
                                     }
                                 </div>
-                            </div>
-                            <div class="col-12 mb-3">
-                                <div class="form-group">
-                                    <label for="district">Volume</label>
-                                   
-                                </div>
-                            </div>
+                            </div>                            
                             <div col-12 mb-3>
                                 <div class="form-group">
                                     <label for="authors">Author(s)</label>

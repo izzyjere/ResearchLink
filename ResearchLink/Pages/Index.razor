@@ -88,7 +88,7 @@
                                         <p class="card-text">Published: @item.DatePublished.Humanize(false)</p>                                        
                                         <p class="card-text">Published in: @item.ResearchTopic.Title</p>                                       
                                        
-                                        <p class="card-text">District: @item.District.Name</p> <p class="card-text">Abstract: @GetBiographyPreview(item.Description)</p>
+                                        <p class="card-text">District: @item.District.Name</p> <p class="card-text">Abstract: @GetBiographyPreview(item.Abstract)</p>
                                         <a href="research?p=@(item.Id)" class="btn btn-primary"><i class="fas fa-file-alt"></i> View More</a>
                                         <button @onclick="()=>DownloadPaper(item)" class="btn btn-danger"><i class="fas fa-file-pdf"></i> Download PDF</button>
                                     </div>
@@ -207,7 +207,7 @@
         {
 
             query = query.Where(a => a.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
-                                       a.Description.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                       a.Abstract.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
                                        a.Authors.Any(a => a.Author.Name.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
                                        a.Authors.Any(a => a.Author.EmailAddress.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||                                      
                                        a.DatePublished >= searchModel.StartDate.ToDateTime(new TimeOnly(0, 0, 0)) &&
@@ -218,7 +218,7 @@
         else if (!string.IsNullOrWhiteSpace(searchModel.SearchText))
         {
             query = query.Where(a => a.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
-                                           a.Description.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                           a.Abstract.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
                                            a.Authors.Any(a => a.Author.Name.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
                                            a.Authors.Any(a => a.Author.EmailAddress.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)));
             await LoadResearchs(search: true);

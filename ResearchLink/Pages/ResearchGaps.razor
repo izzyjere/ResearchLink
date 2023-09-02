@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/research/gap"
 @using System.Text;
 @using System.Text.RegularExpressions;
 
@@ -8,7 +8,7 @@
         <div class="col-md-6">
             <EditForm Model="@searchModel" OnValidSubmit="SearchAsync">
                 <div class="input-group">
-                    <InputText @bind-Value="@searchModel.SearchText" class="form-control" placeholder="Search for papers..." />
+                    <InputText @bind-Value="@searchModel.SearchText" class="form-control" placeholder="Search for submited research gaps..." />
                     <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
                 </div>
                 <div class="row advanced-search">
@@ -75,12 +75,12 @@
                                 <div class="col-md-8">
                                     <div class="card-body">
                                         <h5 class="card-title">@item.Title</h5>
-                                        <p class="card-text">Authors: @GetAuthorNames(item)</p>
-                                        <p class="card-text">Published: @item.DatePublished.Humanize(false)</p>                                        
-                                        <p class="card-text">Published in: @item.ResearchTopic.Title</p>                                       
-                                       
-                                        <p class="card-text">District: @item.District.Name</p> <p class="card-text">Abstract: @GetBiographyPreview(item.Abstract)</p>
-                                        <a href="research?p=@(item.Id)" class="btn btn-primary"><i class="fas fa-file-alt"></i> View More</a>
+                                        <p class="card-text">Proposer: @item.Proposer</p>
+                                        <p class="card-text">Requested: @item.CreatedDate.Humanize(false)</p>
+                                        <p class="card-text">requested in: <span class="text-info">@item.ResearchTopic.Title</span> </p>
+
+                                        <p class="card-text">District: @item.District.Name</p> <p class="card-text">Abstract: @GetBiographyPreview(item.Description)</p>
+                                        <a href="research/gap/view?p=@(item.Id)" class="btn btn-primary"><i class="fas fa-file-alt"></i> View More</a>
                                         <button @onclick="()=>DownloadPaper(item)" class="btn btn-danger"><i class="fas fa-file-pdf"></i> Download PDF</button>
                                     </div>
                                 </div>
@@ -114,10 +114,9 @@
     </div>
 </div>
 @code {
-    Page<Research>? pageModel;
-    SearchModel searchModel = new SearchModel();
-    IEnumerable<Research> articlesList = new List<Research>();
-    IQueryable<Research>? query = null;    
+    Page<ResearchGap>? pageModel;
+    SearchModel searchModel = new SearchModel();    
+    IQueryable<ResearchGap>? query = null;
     [Parameter]
     [SupplyParameterFromQuery(Name = "author")]
     public Guid AuthorId { get; set; }
@@ -125,14 +124,14 @@
     {
         if (AuthorId != Guid.Empty)
         {
-            query = articleService.Table.Where(a => a.Authors.Any(a => a.Author.UserId == AuthorId));
+            query = researchGapService.Table.Where(a => a.ProposedAuthors.Any(a => a.Author.UserId == AuthorId));
         }
         else
         {
-            query = articleService.Table;
+            query = researchGapService.Table;
         }
         await LoadResearchs();
-    }    
+    }
     async Task GoToPage(int pageNumber)
     {
         if (pageNumber == pageModel?.PageNumber || pageNumber == 0 || pageNumber>pageModel?.TotalPages)
@@ -148,9 +147,9 @@
             if (search && query == null)
             {
                 throw new Exception("Search without parameters is not supported.");
-            }           
+            }
             var pageRequest = new PageRequest(page, size);
-            pageModel = await (query ??= articleService.Table).GetPageAsync(pageRequest);
+            pageModel = await (query ??= researchGapService.Table).GetPageAsync(pageRequest);
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception e)
@@ -184,7 +183,7 @@
         var strippedBiography = Regex.Replace(biography, "<.*?>", string.Empty); // Remove HTML tags, if any
         return strippedBiography.Length > maxPreviewLength ? $"{strippedBiography.Substring(0, maxPreviewLength)}..." : strippedBiography;
     }
-    async Task DownloadPaper(Research model)
+    async Task DownloadPaper(ResearchGap model)
     {
         try
         {
@@ -194,6 +193,7 @@
         {
             toastService.Notify(new ToastMessage(ToastType.Danger, e.Message));
         }
+       
     }
     async Task SearchAsync()
     {
@@ -205,26 +205,28 @@
         {
 
             query = query.Where(a => a.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
-                                       a.Abstract.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
-                                       a.Authors.Any(a => a.Author.Name.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
-                                       a.Authors.Any(a => a.Author.EmailAddress.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||                                      
-                                       a.DatePublished >= searchModel.StartDate.ToDateTime(new TimeOnly(0, 0, 0)) &&
-                                       a.DatePublished <= searchModel.EndDate.ToDateTime(new TimeOnly(0, 0, 0)));
+                                       a.Proposer.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                       a.Description.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                       a.ProposedAuthors.Any(a => a.Author.Name.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
+                                       a.ProposedAuthors.Any(a => a.Author.EmailAddress.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
+                                       a.CreatedDate >= searchModel.StartDate.ToDateTime(new TimeOnly(0, 0, 0)) &&
+                                       a.CreatedDate <= searchModel.EndDate.ToDateTime(new TimeOnly(0, 0, 0)));
             await LoadResearchs(search: true);
 
         }
         else if (!string.IsNullOrWhiteSpace(searchModel.SearchText))
         {
             query = query.Where(a => a.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
-                                           a.Abstract.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
-                                           a.Authors.Any(a => a.Author.Name.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
-                                           a.Authors.Any(a => a.Author.EmailAddress.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)));
+                                           a.Proposer.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                       a.Description.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                       a.ProposedAuthors.Any(a => a.Author.Name.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
+                                       a.ProposedAuthors.Any(a => a.Author.EmailAddress.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)));
             await LoadResearchs(search: true);
         }
         else if (searchModel.Advanced)
         {
-            query = query.Where(a =>       a.DatePublished >= searchModel.StartDate.ToDateTime(new TimeOnly(0, 0, 0)) &&
-                                           a.DatePublished <= searchModel.EndDate.ToDateTime(new TimeOnly(0, 0, 0)));
+            query = query.Where(a => a.CreatedDate >= searchModel.StartDate.ToDateTime(new TimeOnly(0, 0, 0)) &&
+                                           a.CreatedDate <= searchModel.EndDate.ToDateTime(new TimeOnly(0, 0, 0)));
             await LoadResearchs(search: true);
         }
 
@@ -232,7 +234,7 @@
 
     class SearchModel
     {
-        public string? SearchText { get; set; }        
+        public string? SearchText { get; set; }
         public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
         public DateOnly EndDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
         public bool Advanced { get; set; }

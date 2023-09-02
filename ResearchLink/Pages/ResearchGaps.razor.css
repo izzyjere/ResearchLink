@@ -1,0 +1,15 @@
+.card {
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Adjust the values as per your preference */
+}
+
+.card-title {
+    font-size: larger;
+}
+
+.advanced-search {
+    margin-top: 0.7rem;
+}
+
+    .advanced-search .row {
+        margin-top: 1rem;
+    }

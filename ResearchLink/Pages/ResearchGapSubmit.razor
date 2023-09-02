@@ -3,7 +3,7 @@
 @using ResearchLink.Core.Shared;
 <div class="container mt-5">
     <h3>@(Id!=Guid.Empty ? "Edit" : "Submit a") research gap</h3>
-    <EditForm Model="@Model">
+    <EditForm OnValidSubmit="Submit" Model="@Model">
         <DataAnnotationsValidator />
         <div class="row">
             <Card class="col-xs-12 col-md-6">

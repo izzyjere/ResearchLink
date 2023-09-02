@@ -1,4 +1,4 @@
-﻿@page "/research"
+﻿@page "/research/gap/view"
 @using System.Globalization;
 <div class="container mt-5">
     @if (Model is null)
@@ -16,13 +16,13 @@
             <CardBody>
                 <div class="row">
                     <div class="col-xs-12 col-md-6">
-                        <h6>Abstract</h6><hr />
-                        <p class="text-justify pa-2">@Model.Abstract</p>
+                        <h6>Description</h6><hr />
+                        <p class="text-justify pa-2">@Model.Description</p>
                     </div>
                     <div class="col-xs-12 col-md-6">
                         <div class="row">
                             <div class="col-6 col-xs-12">
-                                Published : <span class="text-info">@Model.DatePublished.Humanize(false)</span>
+                                Requested : <span class="text-info">@Model.CreatedDate.Humanize(false)</span>
                             </div>
                             <div class="col-6 col-xs-12">
                                 District : <span class="text-info">@Model.District.Name</span>
@@ -36,16 +36,13 @@
                                     <col width="60%" />
                                 </colgroup>
                                 <tr>
+                                    <td class="text-bold">Requested By:</td>
+                                    <td>@Model?.Proposer</td>
+                                </tr>
+                                <tr>
                                     <td class="text-bold">Topic:</td>
                                     <td>@Model?.ResearchTopic?.Title</td>
-                                </tr> 
-                                @if(Model.ResearchGap is not null)
-                                {
-                                    <tr>
-                                        <td class="text-bold">Research Gap:</td>
-                                        <td><a @onclick='()=>Navigation.NavigateTo($"/research/gap?p={Model.ResearchGapId}",true)' class="link-normal">@Model?.ResearchGap?.Title</a></td>
-                                    </tr>
-                                }                                
+                                </tr>
                                 <tr>
                                     <td class="text-bold">District:</td>
                                     <td>@Model?.District?.Name</td>
@@ -55,19 +52,14 @@
                                     <td>@Model?.District?.Province</td>
                                 </tr>
 
-                                <tr>
-                                    <td class="text-bold">Year:</td>
-                                    <td>@Model?.Year</td>
-                                </tr>
-
                             </table>
                         </div>
                         <div class="row p-4">
-                            <h6>Authors</h6>
-                            <ul style="max-height:250px" class="list-group overflow-auto">
-                                @if (Model.Authors.Any())
-                                {
-                                    foreach (var item in Model.Authors)
+                            @if (Model.ProposedAuthors.Any())
+                            {
+                                <h6>Proposed Authors</h6>
+                                <ul style="max-height:250px" class="list-group overflow-auto">
+                                    @foreach (var item in Model.ProposedAuthors)
                                     {
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             <div class="me-3">
@@ -79,8 +71,13 @@
                                             <span class="badge badge-primary badge-pill">1</span>
                                         </li>
                                     }
-                                }
-                            </ul>
+
+                                </ul>
+                            }
+                            else
+                            {
+                                <AuthorisedLink Class="link-normal" Href=@($"submit?gap={Model.Id}")>Submit a reasearch for this gap</AuthorisedLink>
+                            }
                         </div>
                     </div>
                     <div class="col-12">
@@ -150,7 +147,7 @@
             <CardFooter>
                 @if (isMyResearch)
                 {
-                    <a href="edit?p=@(Model.Id)" class="btn btn-success mx-4"><i class="fas fa-edit"></i> Edit</a>
+                    <a href="submit/gap?p=@(Model.Id)" class="btn btn-success mx-4"><i class="fas fa-edit"></i> Edit</a>
                 }
                 <button @onclick="DownloadPaper" class="btn btn-danger"><i class="fas fa-file-pdf"></i> Download PDF</button>
                 <button @onclick="async ()=> await viewDocModal.ShowAsync()" class="btn btn-info"><i class="fas fa-file"></i> View</button>
@@ -171,16 +168,16 @@
     [Parameter]
     [SupplyParameterFromQuery(Name = "p")]
     public Guid Id { get; set; }
-    Research? Model { get; set; }
+    ResearchGap? Model { get; set; }
     Modal viewDocModal;
     bool isMyResearch;
     [CascadingParameter]
     Task<AuthenticationState> AuthenticationStateTask { get; set; }
-    ResearchComment commentModel;
+    ResearchGapComment commentModel;
     CommentReply commentReply;
     ClaimsPrincipal? currentUser;
     bool savingData;
-    List<Comment> comments = new List<Comment>();
+
     protected override async Task OnInitializedAsync()
     {
         currentUser = (await AuthenticationStateTask).User;
@@ -189,7 +186,7 @@
     async Task ReloadData()
     {
 
-        Model = articleService.Get(Id);
+        Model = researchGapService.Get(Id);
         if (Model is null)
         {
             Navigation.NavigateTo("/", true);
@@ -197,11 +194,11 @@
         }
         if (Model != null && currentUser?.Identity != null && currentUser.Identity.IsAuthenticated)
         {
-            isMyResearch = Model.Authors.Any(a => a.Author.UserId == currentUser.GetUserId());
+            isMyResearch = Model.ProposerEmail == currentUser.GetEmail();
         }
         if (Model != null)
         {
-            Model.Comments ??= new List<ResearchComment>();
+            Model.Comments ??= new List<ResearchGapComment>();
         }
         commentModel = InitComment();
         commentReply = new CommentReply();
@@ -218,9 +215,9 @@
             toastService.Notify(new ToastMessage(ToastType.Danger, e.Message));
         }
     }
-    ResearchComment InitComment()
+    ResearchGapComment InitComment()
     {
-        var comment = new ResearchComment();
+        var comment = new ResearchGapComment();
         if (currentUser?.Identity != null && currentUser.Identity.IsAuthenticated)
         {
             comment.User = currentUser.GetFullName();
@@ -232,7 +229,7 @@
         comment.ResearchId = Model.Id;
         return comment;
     }
-    void InitReply(ResearchComment comment)
+    void InitReply(ResearchGapComment comment)
     {
         commentReply = new CommentReply();
         if (currentUser?.Identity != null && currentUser.Identity.IsAuthenticated)
@@ -250,7 +247,7 @@
         savingData = true;
         commentModel.Content = EncodeEmojis(commentModel.Content);
         commentModel.ResearchId = Model.Id;
-        var save = researchCommentService.Save(commentModel);
+        var save = researchGapCommentService.Save(commentModel);
         if (save.Succeded)
         {
             await ReloadData();
@@ -261,14 +258,14 @@
         }
         savingData = false;
     }
-    async void AddReply(ResearchComment comment)
+    async void AddReply(ResearchGapComment comment)
     {
         savingData = true;
         commentReply.Content = EncodeEmojis(commentReply.Content);
         commentReply.CreatedDate = DateTime.Now;
         comment.Replies ??= new List<CommentReply>();
         comment.Replies.Add(commentReply);
-        var save = researchCommentService.Save(comment);
+        var save = researchGapCommentService.Save(comment);
         if (save.Succeded)
         {
             comment.Replying = false;

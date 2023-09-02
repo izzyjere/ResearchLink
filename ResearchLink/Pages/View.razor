@@ -247,7 +247,6 @@
         savingData = true;
         commentModel.Content = EncodeEmojis(commentModel.Content);
         commentModel.ResearchId = Model.Id;
-        commentModel.SetResearchId();
         var save = researchCommentService.Save(commentModel);
         if (save.Succeded)
         {

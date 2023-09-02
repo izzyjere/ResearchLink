@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ResearchLink.Core.DataAccess;
 
@@ -11,9 +12,11 @@ using ResearchLink.Core.DataAccess;
 namespace ResearchLink.Core.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20230902135628_Init2")]
+    partial class Init2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -101,6 +104,43 @@ namespace ResearchLink.Core.Migrations
                     b.HasIndex("ResearchId");
 
                     b.ToTable("AuthorResearch");
+                });
+
+            modelBuilder.Entity("ResearchLink.Core.Models.Comment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ResearchId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("User")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Comment");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Comment");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("ResearchLink.Core.Models.District", b =>
@@ -239,37 +279,6 @@ namespace ResearchLink.Core.Migrations
                     b.ToTable("Research");
                 });
 
-            modelBuilder.Entity("ResearchLink.Core.Models.ResearchComment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("ResearchId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("User")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ResearchId");
-
-                    b.ToTable("ResearchComment");
-                });
-
             modelBuilder.Entity("ResearchLink.Core.Models.ResearchGap", b =>
                 {
                     b.Property<Guid>("Id")
@@ -311,37 +320,6 @@ namespace ResearchLink.Core.Migrations
                     b.ToTable("ResearchGap");
                 });
 
-            modelBuilder.Entity("ResearchLink.Core.Models.ResearchGapComment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("ResearchId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("User")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ResearchId");
-
-                    b.ToTable("ResearchGapComment");
-                });
-
             modelBuilder.Entity("ResearchLink.Core.Models.ResearchTopic", b =>
                 {
                     b.Property<Guid>("Id")
@@ -369,6 +347,24 @@ namespace ResearchLink.Core.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ResearchTopic");
+                });
+
+            modelBuilder.Entity("ResearchLink.Core.Models.ResearchComment", b =>
+                {
+                    b.HasBaseType("ResearchLink.Core.Models.Comment");
+
+                    b.HasIndex("ResearchId");
+
+                    b.HasDiscriminator().HasValue("ResearchComment");
+                });
+
+            modelBuilder.Entity("ResearchLink.Core.Models.ResearchGapComment", b =>
+                {
+                    b.HasBaseType("ResearchLink.Core.Models.Comment");
+
+                    b.HasIndex("ResearchId");
+
+                    b.HasDiscriminator().HasValue("ResearchGapComment");
                 });
 
             modelBuilder.Entity("ResearchLink.Core.Models.Author", b =>
@@ -421,6 +417,42 @@ namespace ResearchLink.Core.Migrations
                     b.Navigation("Author");
 
                     b.Navigation("Research");
+                });
+
+            modelBuilder.Entity("ResearchLink.Core.Models.Comment", b =>
+                {
+                    b.OwnsMany("ResearchLink.Core.Models.CommentReply", "Replies", b1 =>
+                        {
+                            b1.Property<Guid>("CommentId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("Content")
+                                .IsRequired()
+                                .HasMaxLength(250)
+                                .HasColumnType("nvarchar(250)");
+
+                            b1.Property<DateTime>("CreatedDate")
+                                .HasColumnType("datetime2");
+
+                            b1.Property<string>("User")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("CommentId", "Id");
+
+                            b1.ToTable("CommentReplies", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("CommentId");
+                        });
+
+                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("ResearchLink.Core.Models.Document", b =>
@@ -509,51 +541,6 @@ namespace ResearchLink.Core.Migrations
                     b.Navigation("ResearchTopic");
                 });
 
-            modelBuilder.Entity("ResearchLink.Core.Models.ResearchComment", b =>
-                {
-                    b.HasOne("ResearchLink.Core.Models.Research", "Research")
-                        .WithMany("Comments")
-                        .HasForeignKey("ResearchId");
-
-                    b.OwnsMany("ResearchLink.Core.Models.CommentReply", "Replies", b1 =>
-                        {
-                            b1.Property<Guid>("ResearchCommentId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
-
-                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
-
-                            b1.Property<Guid>("CommentId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("Content")
-                                .IsRequired()
-                                .HasMaxLength(250)
-                                .HasColumnType("nvarchar(250)");
-
-                            b1.Property<DateTime>("CreatedDate")
-                                .HasColumnType("datetime2");
-
-                            b1.Property<string>("User")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.HasKey("ResearchCommentId", "Id");
-
-                            b1.ToTable("ResearchCommentReplies", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("ResearchCommentId");
-                        });
-
-                    b.Navigation("Replies");
-
-                    b.Navigation("Research");
-                });
-
             modelBuilder.Entity("ResearchLink.Core.Models.ResearchGap", b =>
                 {
                     b.HasOne("ResearchLink.Core.Models.ResearchTopic", "ResearchTopic")
@@ -595,47 +582,20 @@ namespace ResearchLink.Core.Migrations
                     b.Navigation("ResearchTopic");
                 });
 
+            modelBuilder.Entity("ResearchLink.Core.Models.ResearchComment", b =>
+                {
+                    b.HasOne("ResearchLink.Core.Models.Research", "Research")
+                        .WithMany("Comments")
+                        .HasForeignKey("ResearchId");
+
+                    b.Navigation("Research");
+                });
+
             modelBuilder.Entity("ResearchLink.Core.Models.ResearchGapComment", b =>
                 {
                     b.HasOne("ResearchLink.Core.Models.ResearchGap", "Research")
                         .WithMany("Comments")
                         .HasForeignKey("ResearchId");
-
-                    b.OwnsMany("ResearchLink.Core.Models.CommentReply", "Replies", b1 =>
-                        {
-                            b1.Property<Guid>("ResearchGapCommentId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<int>("Id")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
-
-                            SqlServerPropertyBuilderExtensions.UseIdentityColumn(b1.Property<int>("Id"));
-
-                            b1.Property<Guid>("CommentId")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("Content")
-                                .IsRequired()
-                                .HasMaxLength(250)
-                                .HasColumnType("nvarchar(250)");
-
-                            b1.Property<DateTime>("CreatedDate")
-                                .HasColumnType("datetime2");
-
-                            b1.Property<string>("User")
-                                .IsRequired()
-                                .HasColumnType("nvarchar(max)");
-
-                            b1.HasKey("ResearchGapCommentId", "Id");
-
-                            b1.ToTable("ResearchGapCommentReplies", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("ResearchGapCommentId");
-                        });
-
-                    b.Navigation("Replies");
 
                     b.Navigation("Research");
                 });

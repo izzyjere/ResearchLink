@@ -46,11 +46,20 @@ public class DatabaseContext : DbContext
                av.ToTable("ResearchGapDocuments");               
                av.WithOwner();
            });
-        modelBuilder.Entity<Comment>(comment =>
+        modelBuilder.Entity<ResearchGapComment>(comment =>
         {
            comment.OwnsMany(c => c.Replies, reply =>
            {
-               reply.ToTable("CommentReplies");
+               reply.ToTable("ResearchGapCommentReplies");
+               reply.WithOwner();
+           });
+        });
+
+        modelBuilder.Entity<ResearchComment>(comment =>
+        {
+           comment.OwnsMany(c => c.Replies, reply =>
+           {
+               reply.ToTable("ResearchCommentReplies");
                reply.WithOwner();
            });
         });

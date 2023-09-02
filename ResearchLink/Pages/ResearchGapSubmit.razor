@@ -128,7 +128,7 @@
 </div>
 <ConfirmDialog @ref="@confirmDialog"/>
 @code {
-    ResearchGap? Model;
+    ResearchGap? Model = new();
     [Parameter]
     [SupplyParameterFromQuery(Name = "p")]
     public Guid Id { get; set; }

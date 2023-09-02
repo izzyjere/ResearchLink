@@ -99,7 +99,7 @@
                     <Button Color="ButtonColor.Success" Type="ButtonType.Submit">Submit</Button>
                 </CardHeader>
                 <CardBody class="row">
-                    <DragZoneInputFile Class="col-12" OnUpload="OnFileUpload"></DragZoneInputFile>
+                    <DragZoneInputFile FileFormats=".pdf" Class="col-12" OnUpload="OnFileUpload"></DragZoneInputFile>
 
                     @if (documentFile !=null)
                     {
@@ -207,6 +207,16 @@
                 });
             return;
         }
+        if(Model.ResearchTopicId == Guid.Empty)
+        {
+            toastService.Notify(new ToastMessage
+                {
+                    Message = "Please select a research topic.",
+                    IconName = IconName.Exclamation,
+                    Type = ToastType.Danger
+                });
+            return;
+        }
         if (Model.Document is null)
         {
             toastService.Notify(new ToastMessage
@@ -307,6 +317,7 @@
         {
             createNewResearchTopic = false;
             researchTopicModel = researchTopics.FirstOrDefault(p => p.Id == researchTopicId);
+            Model.ResearchTopicId = researchTopicModel.Id;
             StateHasChanged();
 
         }
@@ -325,12 +336,14 @@
         if (!researchTopics.Any(j => j.Title.Equals(ResearchTopicName, StringComparison.OrdinalIgnoreCase)))
         {
             processing = true;
-            var researchTopic = new ResearchTopic { Title = ResearchTopicName, Description = ResearchTopicDescription };
+            var researchTopic = new ResearchTopic { Title = ResearchTopicName, Description = ResearchTopicDescription, Objective = ResearchTopicObjective };
             researchTopicService.Save(researchTopic);
+            researchTopics = researchTopicService.Table.ToList();
             researchTopicModel = researchTopics.FirstOrDefault(j => j.Title.Equals(ResearchTopicName, StringComparison.OrdinalIgnoreCase));
             ResearchTopicName = string.Empty;
             ResearchTopicDescription = string.Empty;
             processing = false;
+            createNewResearchTopic = false;
             StateHasChanged();
         }
     }

@@ -35,21 +35,30 @@
                                     <col width="40%" />
                                     <col width="60%" />
                                 </colgroup>
-                                
-                                
+                                <tr>
+                                    <td class="text-bold">Published In:</td>
+                                    <td>@Model?.ResearchTopic?.Title</td>
+                                </tr> 
+                                @if(Model.ResearchGap is not null)
+                                {
                                     <tr>
-                                        <td class="text-bold">Published In:</td>
-                                        <td>@Model?.ResearchTopic?.Title</td>
+                                        <td class="text-bold">Research Gap:</td>
+                                        <td><a @onclick='()=>Navigation.NavigateTo($"/research/gap?p={Model.ResearchGapId}",true)' class="link-normal">@Model?.ResearchGap?.Title</a></td>
                                     </tr>
-                                    <tr>
-                                        <td class="text-bold">District:</td>
-                                        <td>@Model?.District?.Name</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="text-bold">Province:</td>
-                                        <td>@Model?.District?.Province</td>
-                                    </tr>
-                               
+                                }
+                                <tr>
+                                    <td class="text-bold">Published In:</td>
+                                    <td>@Model?.ResearchTopic?.Title</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-bold">District:</td>
+                                    <td>@Model?.District?.Name</td>
+                                </tr>
+                                <tr>
+                                    <td class="text-bold">Province:</td>
+                                    <td>@Model?.District?.Province</td>
+                                </tr>
+
                                 <tr>
                                     <td class="text-bold">Year:</td>
                                     <td>@Model?.Year</td>
@@ -179,13 +188,13 @@
     protected override async Task OnInitializedAsync()
     {
         currentUser = (await AuthenticationStateTask).User;
-        await ReloadData();    
+        await ReloadData();
     }
     async Task ReloadData()
     {
 
-        Model = articleService.Get(Id);    
-        if(Model is null)
+        Model = articleService.Get(Id);
+        if (Model is null)
         {
             Navigation.NavigateTo("/", true);
             return;
@@ -215,7 +224,7 @@
         }
         else
         {
-            comment.User = "Anonymous"; 
+            comment.User = "Anonymous";
         }
         comment.ResearchId = Model.Id;
         return comment;
@@ -235,7 +244,7 @@
     }
     async void AddComment()
     {
-        savingData = true;  
+        savingData = true;
         commentModel.Content = EncodeEmojis(commentModel.Content);
         var save = commentService.Save(commentModel);
         if (save.Succeded)

@@ -36,7 +36,7 @@
                                     <col width="60%" />
                                 </colgroup>
                                 <tr>
-                                    <td class="text-bold">Published In:</td>
+                                    <td class="text-bold">Topic:</td>
                                     <td>@Model?.ResearchTopic?.Title</td>
                                 </tr> 
                                 @if(Model.ResearchGap is not null)
@@ -45,11 +45,7 @@
                                         <td class="text-bold">Research Gap:</td>
                                         <td><a @onclick='()=>Navigation.NavigateTo($"/research/gap?p={Model.ResearchGapId}",true)' class="link-normal">@Model?.ResearchGap?.Title</a></td>
                                     </tr>
-                                }
-                                <tr>
-                                    <td class="text-bold">Published In:</td>
-                                    <td>@Model?.ResearchTopic?.Title</td>
-                                </tr>
+                                }                                
                                 <tr>
                                     <td class="text-bold">District:</td>
                                     <td>@Model?.District?.Name</td>

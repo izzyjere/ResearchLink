@@ -1,20 +1,143 @@
-﻿@* @page "/submit/gap"
+﻿@page "/submit/gap"
+@using DragZoneInputFile
 @using ResearchLink.Core.Shared;
 <div class="container mt-5">
     <h3>@(Id!=Guid.Empty ? "Edit" : "Submit a") research gap</h3>
     <EditForm Model="@Model">
         <DataAnnotationsValidator />
         <div class="row">
+            <Card class="col-xs-12 col-md-6">
+                <CardBody class="row">
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="title">Research Title</label>
+                                    <InputText type="text" class="form-control" id="title" @bind-Value="@Model.Title" />
+                                    <ValidationMessage For="()=>Model.Title" />
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="abstract">Description</label>
+                                    <InputTextArea placeholder="type or paste research gap description here." rows="25" style="max-height:65vh" class="form-control" id="abstract" @bind-Value="@Model.Description" />
+                                    <ValidationMessage For="()=>Model.Description" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="col-12 mb-3">
+                                <div class="form-group">
+                                    <label for="district">District</label>
+                                    <AutoComplete @bind-Value="@districtName"
+                                                  ElementId="district"
+                                                  DataProvider="DistrictDataProvider"
+                                                  TItem="District"
+                                                  StringComparison="StringComparison.OrdinalIgnoreCase"
+                                                  OnChanged="OnDistrictChanged"
+                                                  Placeholder="Type district name"
+                                                  PropertyName="Name" />
+                                    <ValidationMessage For="()=>Model.DistrictId" />
+                                </div>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <div class="form-group">
+                                    <label for="researchTopic">ResearchTopic</label>
+                                    @if (createNewResearchTopic)
+                                    {
+                                        <InputText placeholder="New research popic title" id="researchTopic" @bind-Value="@ResearchTopicName" class="form-control" />
+                                        <InputText placeholder="New research popic description" id="researchTopicDescription" @bind-Value="@ResearchTopicDescription" class="form-control mt-2" />
+                                        <InputText placeholder="New research popic objective" id="objective" @bind-Value="@ResearchTopicObjective" class="form-control mt-2" />
+                                        <Icon class="mt-2" Color="IconColor.Info" title="save topic" @onclick="AddResearchTopic" Name="@IconName.WindowPlus"></Icon>
+                                    }
+                                    else
+                                    {
+                                        <InputSelect id="researchTopic" TValue="Guid" ValueExpression="()=>(creatingGuid)" ValueChanged="OnResearchTopicChanged" class="form-select">
+                                            <option value="@Guid.Empty">Select researchTopic</option>
+                                            @foreach (var item in researchTopics)
+                                            {
+                                                <option value="@item.Id">@item.Title</option>
+                                            }
+                                            <option class="text-info" value="@creatingGuid">Create new researchTopic</option>
+                                        </InputSelect>
+                                    }
+                                </div>
+                            </div>
+                            <div col-12 mb-3>
+                                <div class="form-group">
+                                    <label for="proposer">Proposer</label>
+                                    <InputText type="text" class="form-control" id="proposer" @bind-Value="@Model.Proposer" />
+                                    <ValidationMessage For="()=>Model.Proposer" />
+                                </div>
+                            </div>
+                            <div col-12 mb-3>
+                                <div class="form-group">
+                                    <label for="proposerEmail">Email Address</label>
+                                    <InputText type="email" class="form-control" id="proposerEmail" @bind-Value="@Model.ProposerEmail" />
+                                    <ValidationMessage For="()=>Model.ProposerEmail" />
+                                </div>
+                            </div>
+                            <div col-12 mb-3>
+                                <div class="form-group">
+                                    <label for="authors">Suggested Author(s)</label>
+                                    <AutoComplete @bind-Value="@articleAuthor"
+                                                  ElementId="authors"
+                                                  DataProvider="AuthorsDataProvider"
+                                                  TItem="Author"
+                                                  StringComparison="StringComparison.OrdinalIgnoreCase"
+                                                  OnChanged="OnAuthorPicked"
+                                                  Placeholder="Type author name"
+                                                  PropertyName="FullName" />
+                                </div>
+                                <div style="height:150px; overflow:auto" class="mt-3">
+                                    <ol class="list-group list-group-numbered">
+                                        @foreach (var item in articleAuthors)
+                                        {
+                                            <li class="list-group-item list-group-item-info d-flex justify-content-between align-items-start">
+                                                <div class="ms-2 me-auto">
+                                                    @(item.Title).   @item.FirstName @item.LastName
+                                                </div>
+                                                <Icon Color="IconColor.Danger" @onclick="()=>articleAuthors.Remove(item)" title="remove this author" Name="IconName.Trash" />
+                                            </li>
+                                        }
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </CardBody>
+            </Card>
+            <Card class="col-xs-12 col-md-6">
+                <CardHeader>
+                    <Button Color="ButtonColor.Success" Type="ButtonType.Submit">Submit</Button>
+                </CardHeader>
+                <CardBody class="row">
+                    <DragZoneInputFile FileFormats=".pdf" Class="col-12" OnUpload="OnFileUpload"></DragZoneInputFile>
 
+                    @if (documentModel !=null)
+                    {
+                        <div id="documentPreview" class="col-12">
+                            <embed id="dViewer" src="@(fileSystemHelper.ReadAsBlob(documentModel))" type="application/pdf" width="100%" height="90%" />
+                        </div>
+                    }
+                </CardBody>
+            </Card>
         </div>
     </EditForm>
 </div>
-
+<ConfirmDialog @ref="@confirmDialog"/>
 @code {
-    ResearchGap? Model = new();
+    ResearchGap? Model;
     [Parameter]
     [SupplyParameterFromQuery(Name = "p")]
     public Guid Id { get; set; }
+    [CascadingParameter]
+    Task<AuthenticationState> AuthenticationStateTask { get; set; }
+    ClaimsPrincipal? claimsPrincipal { get; set; }
+    List<Author> authors = new List<Author>();
+    List<Author> articleAuthors = new List<Author>();
+    List<District> districts = new List<District>();
+    ConfirmDialog confirmDialog;
 
     protected override async Task OnInitializedAsync()
     {
@@ -22,22 +145,168 @@
         {
             Model = await researchGapService.Table.FirstOrDefaultAsync(x => x.Id==Id);
         }
+        else
+        {
+            Model = new();
+        }
+        claimsPrincipal = (await AuthenticationStateTask).User;
+        if (claimsPrincipal != null && claimsPrincipal.Identity.IsAuthenticated)
+        {
+            Model.Proposer = claimsPrincipal.GetFullName();
+            Model.ProposerEmail = claimsPrincipal.GetEmail();
+        }
+        researchTopics = await researchTopicService.Table.ToListAsync();
     }
     async Task Submit()
     {
-        var result = researchGapService.Save(Model);
-        if(result.Succeded)
+        
+        if(articleAuthors.Count==0)
         {
-            toastService.Notify(new ToastMessage(ToastType.Success,"Research gap submitted successfully"));
+            var confirmation2 = await confirmDialog.ShowAsync("No Authors", "You have not selected authors to work on this research. Continue?", new ConfirmDialogOptions { IsVerticallyCentered=true, YesButtonText="Yes" });
+            if (!confirmation2)
+            {
+                return;
+            }
+        }
+        var confirmation = await confirmDialog.ShowAsync("Confirm", "Are you sure you want to submit this research gap?", new ConfirmDialogOptions { IsVerticallyCentered=true, YesButtonText="Yes" });
+        if (!confirmation)
+        {
+            return;
+        }
+        if(Model.Document is null)
+        {
+            toastService.Notify(new ToastMessage(ToastType.Danger, "Please upload document a with fully described problem statement."));
+            return;
+        }
+        var result = researchGapService.Save(Model);
+        if (result.Succeded)
+        {
+            toastService.Notify(new ToastMessage(ToastType.Success, "Research gap submitted successfully"));
             Navigation.NavigateTo($"/research/gap?author={Model.ProposerEmail.Replace("@", "_").Replace(".", "_")}");
         }
         else
         {
             toastService.Notify(new ToastMessage(ToastType.Danger, "An error occured while submitting research gap"));
-        }      
+        }
     }
 }
-@code{
+@code {
     FileModel? documentModel;
+    string articleAuthor = string.Empty;
+    bool createNewResearchTopic;
+    string ResearchTopicName { get; set; }
+    string districtName;
+    string ResearchTopicDescription { get; set; }
+    string ResearchTopicObjective { get; set; }
+    Guid creatingGuid = Guid.NewGuid();
+    List<ResearchTopic> researchTopics = new List<ResearchTopic>();
+    private async Task<AutoCompleteDataProviderResult<Author>> AuthorsDataProvider(AutoCompleteDataProviderRequest<Author> request)
+    {
+
+        authors = await authorService.Table.ToListAsync(); // call a service or an API to pull the authors
+        return await Task.FromResult(new AutoCompleteDataProviderResult<Author> { Data = authors, TotalCount=authors.Count });
+    }
+    private async Task<AutoCompleteDataProviderResult<District>> DistrictDataProvider(AutoCompleteDataProviderRequest<District> request)
+    {
+        districts = await districtService.Table.ToListAsync(); // call a service or an API to pull the authors
+        return await Task.FromResult(new AutoCompleteDataProviderResult<District> { Data = districts, TotalCount=districts.Count() });
+    }
+    void OnAuthorPicked(Author author)
+    {
+        if (author is not null)
+        {
+            if (articleAuthors.Any(a => a.Id==author.Id))
+            {
+                toastService.Notify(new ToastMessage
+                    {
+                        Message = "This author has already been added",
+                        IconName = IconName.Exclamation,
+                        Type = ToastType.Warning
+                    });
+                articleAuthor = string.Empty;
+                return;
+            }
+            articleAuthors.Add(author);
+            articleAuthor = string.Empty;
+            StateHasChanged();
+        }
+    }
+    void OnDistrictChanged(District district)
+    {
+        if (district != null)
+        {
+            Model.DistrictId = district.Id;
+        }
+    }
+
+    void OnResearchTopicChanged(Guid researchTopicId)
+    {
+
+        if (researchTopicId == creatingGuid)
+        {
+            createNewResearchTopic = true;
+        }
+        else
+        {
+            createNewResearchTopic = false;
+            var researchTopicModel = researchTopics.FirstOrDefault(p => p.Id == researchTopicId);
+            Model.ResearchTopicId = researchTopicModel?.Id ?? Guid.Empty;
+            StateHasChanged();
+
+        }
+    }
+    async Task OnFileUpload(InputFileChangeEventArgs args)
+    {
+        try
+        {
+            preloadService.Show(SpinnerColor.Warning);
+            var file = args.File;
+            if (file.Size > 10000000)
+            {
+                toastService.Notify(new ToastMessage(ToastType.Danger, "File size can not be more than 10mb."));
+                return;
+            }
+            var fileStream = file.OpenReadStream(10000000);
+            var memoryStream = new MemoryStream();
+            await fileStream.CopyToAsync(memoryStream);
+            documentModel = fileSystemHelper.Upload(memoryStream, file.ContentType, Core.Shared.FileStore.documents);
+            if (documentModel is null)
+            {
+                toastService.Notify(new ToastMessage(ToastType.Danger, "File upload failed. Try again."));
+                return;
+            };
+            Model.Document = documentModel;
+            StateHasChanged();
+            preloadService.Hide();
+        }
+        catch (Exception)
+        {
+            toastService.Notify(new ToastMessage(ToastType.Danger, "File upload failed. Try again."));
+        }
+        finally
+        {
+            preloadService.Hide();
+        }
+
+    }
+    bool processing;
+    void AddResearchTopic()
+    {
+        if (string.IsNullOrWhiteSpace(ResearchTopicName) || string.IsNullOrWhiteSpace(ResearchTopicDescription))
+        {
+            return;
+        }
+        if (!researchTopics.Any(j => j.Title.Equals(ResearchTopicName, StringComparison.OrdinalIgnoreCase)))
+        {
+            processing = true;
+            var researchTopic = new ResearchTopic { Title = ResearchTopicName, Description = ResearchTopicDescription, Objective = ResearchTopicObjective };
+            researchTopicService.Save(researchTopic);
+            researchTopics = researchTopicService.Table.ToList();
+            ResearchTopicName = string.Empty;
+            ResearchTopicDescription = string.Empty;
+            processing = false;
+            createNewResearchTopic = false;
+            StateHasChanged();
+        }
+    }
 }
- *@

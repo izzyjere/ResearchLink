@@ -11,6 +11,10 @@ namespace ResearchLink.Core.Models
         public string User { get; set; }        
         public virtual ICollection<CommentReply> Replies { get; set; }
         [NotMapped]
-        public bool Replying { get; set; }  
+        public bool Replying { get; set; }
+        public Comment()
+        {
+            Replies = new List<CommentReply>();
+        }
     }   
 }

@@ -5,8 +5,7 @@ namespace ResearchLink
     public static class PagenationExtensions
     {
         public  static async Task<Page<T>> GetPageAsync<T>(this IQueryable<T> table, PageRequest pageRequest) where T:class, IEntity
-        {
-            
+        {              
             var count = await table.CountAsync();
             var totalPages = (int)Math.Ceiling(count / (double)pageRequest.PageSize);
             var items = await table.OrderByDescending(a => a.CreatedDate).Skip((pageRequest.PageNumber - 1) * pageRequest.PageSize).Take(pageRequest.PageSize).ToListAsync();

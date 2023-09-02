@@ -7,7 +7,7 @@
         {
             <div class="col-md-4">
                 <div class="card mb-3">
-                    <img style="object-fit:cover !important" height="320" width="480" src='@(author.HasAvatar?fileSystemHelper.ReadAsBlob(author.Avatar):"https://via.placeholder.com/200")' alt="Author Image" class="img-fluid">
+                    <img style="object-fit:cover !important"  src='@(author.HasAvatar?fileSystemHelper.ReadAsBlob(author.Avatar):$"generateAvatar/{author.Initials}/400/400/30")' alt="Author Image" class="img-fluid">
                     <div class="card-body">
                         <h5 class="card-title">
                             <a href="profile?uid=@(author.UserId)">

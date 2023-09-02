@@ -16,7 +16,7 @@ public static class HelperExtensions
                 o.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery);
                 o.MigrationsAssembly(typeof(DatabaseContext).Assembly.FullName);
             });
-        });
+        }, ServiceLifetime.Transient);
         services.AddDomainServices();
         return services;
     }

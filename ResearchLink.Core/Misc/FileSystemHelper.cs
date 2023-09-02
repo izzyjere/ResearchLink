@@ -44,10 +44,15 @@ namespace ResearchLink.Core.Misc
         }
         bool FileIsCleanable(string fileName)
         {
-            var filePresent = _databaseContext.Set<Author>().Select(a=>a.Avatar).Any(f=>f.FileName==fileName);
-            var filePresent2 = _databaseContext.Set<Research>().Select(a=>a.Document).Any(f=>f.FileName==fileName);
-           return !filePresent && !filePresent2;
-        }   
+            if (fileName.Contains("districts.json"))
+            {
+                return false;
+            }
+            var filePresent = _databaseContext.Set<Author>().Select(a => a.Avatar).Any(f => f.FileName==fileName);
+            var filePresent2 = _databaseContext.Set<Research>().Select(a => a.Document).Any(f => f.FileName==fileName);
+            var filePresent3 = _databaseContext.Set<ResearchGap>().Select(a => a.Document).Any(f => f.FileName==fileName);
+            return !filePresent && !filePresent2 && !filePresent3;
+        }
         public async Task RunFileStoreCleanUp()
         {
             _logger.LogInformation($"Filestore cleanup triggered at {DateTime.Now:dd/MM/yyy H:mm:ss}");

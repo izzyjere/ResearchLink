@@ -30,7 +30,7 @@
             </EditForm>
             <AuthorizeView>
                 <Authorized>
-                    <div class="mt-4 float-end">Have something in mind? <a href="submit">Submit your research here</a></div>
+                    <div class="mt-4 float-end">Have something in mind? <a href="submit/gap">Submit your research gap here</a></div>
                 </Authorized>
                 <NotAuthorized>
                     <div class="mt-4 float-end">Not yet a member? <a href="signup">Signup here</a></div>
@@ -57,7 +57,7 @@
                 {
                     <center>
                         <div class="col-6 mt-4">
-                            <Alert Color="AlertColor.Primary"> <Icon Name="IconName.InfoCircleFill" class="me-2"></Icon> No research papers found. Be the first to submit a paper <a href="submit">here</a></Alert>
+                            <Alert Color="AlertColor.Primary"> <Icon Name="IconName.InfoCircleFill" class="me-2"></Icon> No research gaps are assigned to you yet. Create one  <a href="submit">here</a></Alert>
                         </div>
                     </center>
                 }
@@ -118,7 +118,7 @@
     SearchModel searchModel = new SearchModel();    
     IQueryable<ResearchGap>? query = null;
     [Parameter]
-    [SupplyParameterFromQuery(Name = "author")]
+    [SupplyParameterFromQuery(Name = "researcher")]
     public Guid AuthorId { get; set; }
     protected override async Task OnInitializedAsync()
     {

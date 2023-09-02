@@ -14,11 +14,19 @@
                     <NavLink class="nav-link" href="people">People</NavLink>
                 </li>
                 <li class="nav-item">
-                    <NavLink class="nav-link" href="research/gap">Gaps</NavLink>
+                    <AuthorizeView>
+                        <Authorized>
+                            <NavLink class="nav-link" href='@($"research/gap?researcher={context.User.GetUserId()}")'>Research Gaps</NavLink>
+                        </Authorized>
+                        <NotAuthorized>
+                            <NavLink class="nav-link" href="research/gap">Research Gaps</NavLink>
+                        </NotAuthorized>
+                    </AuthorizeView>
+                    
                 </li>
                 <li class="nav-item dropdown">
                     <NavLink class="nav-link dropdown-toggle" href="publications" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        Research
+                        Submissions
                     </NavLink>
                     <ul class="dropdown-menu">
                         <li><a class="dropdown-item" href="/">View All</a></li>

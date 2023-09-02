@@ -1,3 +1,6 @@
 ﻿namespace ResearchLink.Core.Services;
 
-public interface IDistrictService : IServiceBase<District> { }
+public interface IDistrictService : IServiceBase<District>
+{
+   
+}

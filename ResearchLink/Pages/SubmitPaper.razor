@@ -1,5 +1,6 @@
 ﻿@page "/submit"
 @page "/edit"
+@using DragZoneInputFile
 @using ResearchLink.Core.Shared;
 <div class="container mt-5">
     <h3>@(Id!=Guid.Empty ? "Edit" : "Submit a") research</h3>
@@ -29,24 +30,15 @@
                             <div class="col-12 mb-3">
                                 <div class="form-group">
                                     <label for="district">District</label>
-                                    @if (createNewDistrict && Model.DistrictId == Guid.Empty)
-                                    {
-                                        <InputText placeholder="New district name" id="district" @bind-Value="@DistrictName" class="form-control" />
-                                        <InputText placeholder="New district province" id="province" @bind-Value="@DistrictName" class="form-control" />
-                                        <Icon class="mt-2" Color="IconColor.Success" title="Save" Name="@IconName.DatabaseAdd" @onclick="AddDistrict"></Icon>
-                                    }
-                                    else
-                                    {
-                                        <InputSelect id="district" TValue="Guid" ValueExpression="()=>Model.DistrictId" ValueChanged="OnDistrictChanged" class="form-select">
-                                            <option value="@Guid.Empty">Select district</option>
-                                            @foreach (var district in districts)
-                                            {
-                                                <option value="@district.Id">@district.Name</option>
-                                            }
-                                            <option class="text-info" value="@creatingGuid">Create new district</option>
-                                        </InputSelect>
-                                        <ValidationMessage For="()=>Model.DistrictId" />
-                                    }
+                                    <AutoComplete @bind-Value="@DistrictName"
+                                                  ElementId="district"
+                                                  DataProvider="DistrictDataProvider"
+                                                  TItem="District"
+                                                  StringComparison="StringComparison.OrdinalIgnoreCase"
+                                                  OnChanged="OnDistrictChanged"
+                                                  Placeholder="Type district name"
+                                                  PropertyName="Name" />
+                                    <ValidationMessage For="()=>Model.DistrictId" />
                                 </div>
                             </div>
                             <div class="col-12 mb-3">
@@ -54,9 +46,10 @@
                                     <label for="researchTopic">ResearchTopic</label>
                                     @if (createNewResearchTopic && researchTopicModel == null)
                                     {
-                                        <InputText placeholder="New researchTopic name" id="researchTopic" @bind-Value="@ResearchTopicName" class="form-control" />
-                                        <InputText placeholder="New researchTopic description" id="researchTopicDescription" @bind-Value="@ResearchTopicDescription" class="form-control mt-2" />
-                                        <Icon class="mt-2" Color="IconColor.Info" title="Add Volumes" Name="@IconName.WindowPlus" ></Icon>
+                                        <InputText placeholder="New research popic title" id="researchTopic" @bind-Value="@ResearchTopicName" class="form-control" />
+                                        <InputText placeholder="New research popic description" id="researchTopicDescription" @bind-Value="@ResearchTopicDescription" class="form-control mt-2" />
+                                        <InputText placeholder="New research popic objective" id="objective" @bind-Value="@ResearchTopicObjective" class="form-control mt-2" />
+                                        <Icon class="mt-2" Color="IconColor.Info" title="save topic" @onclick="AddResearchTopic" Name="@IconName.WindowPlus"></Icon>
                                     }
                                     else
                                     {
@@ -70,7 +63,7 @@
                                         </InputSelect>
                                     }
                                 </div>
-                            </div>                            
+                            </div>
                             <div col-12 mb-3>
                                 <div class="form-group">
                                     <label for="authors">Author(s)</label>
@@ -106,10 +99,7 @@
                     <Button Color="ButtonColor.Success" Type="ButtonType.Submit">Submit</Button>
                 </CardHeader>
                 <CardBody class="row">
-                    <div @ref="@dragElement" class="col-12 drag-drop">
-                        <InputFile style="position: absolute; width: 100%;height: 100%;opacity: 0;cursor: pointer;" @ondragenter="OnDragEnter" @ondragleave="OnDragLeave" @ref="@documentUpload" OnChange="OnFileUpload" id="documentUpload" accept=".pdf"></InputFile>
-                        Drag and drop files here or click to upload.
-                    </div>
+                    <DragZoneInputFile Class="col-12" OnUpload="OnFileUpload"></DragZoneInputFile>
 
                     @if (documentFile !=null)
                     {
@@ -131,9 +121,8 @@
     ClaimsPrincipal? claimsPrincipal { get; set; }
     List<Author> authors = new List<Author>();
     List<Author> articleAuthors = new List<Author>();
-    string articleAuthor, articleTitle;
-    ElementReference dragElement;
-    InputFile documentUpload;
+    string articleAuthor, articleTitle; 
+
     FileModel? documentFile;
     ConfirmDialog dialog;
     [Parameter]
@@ -145,10 +134,10 @@
         authors = await authorService.Table.ToListAsync(); // call a service or an API to pull the authors
         return await Task.FromResult(new AutoCompleteDataProviderResult<Author> { Data = authors, TotalCount=authors.Count });
     }
-    private async Task<AutoCompleteDataProviderResult<Research>> ResearchsDataProvider(AutoCompleteDataProviderRequest<Research> request)
+    private async Task<AutoCompleteDataProviderResult<District>> DistrictDataProvider(AutoCompleteDataProviderRequest<District> request)
     {
-        var articles = await articleService.Table.ToListAsync(); // call a service or an API to pull the authors
-        return await Task.FromResult(new AutoCompleteDataProviderResult<Research> { Data = articles, TotalCount=articles.Count });
+        districts = await districtService.Table.ToListAsync(); // call a service or an API to pull the authors
+        return await Task.FromResult(new AutoCompleteDataProviderResult<District> { Data = districts, TotalCount=districts.Count() });
     }
     protected override async Task OnInitializedAsync()
     {
@@ -250,15 +239,7 @@
         {
             toastService.Notify(new ToastMessage { Title="Error", Message = "Paper submission failed.", Type=ToastType.Danger, IconName=IconName.Exclamation });
         }
-    }
-    async Task OnDragEnter(DragEventArgs args)
-    {
-        await javaScriptRuntime.InvokeVoidAsync("focusDrag", dragElement, true);
-    }
-    async Task OnDragLeave(DragEventArgs args)
-    {
-        await javaScriptRuntime.InvokeVoidAsync("focusDrag", dragElement, false);
-    }
+    }  
 
     async Task OnFileUpload(InputFileChangeEventArgs args)
     {
@@ -305,23 +286,14 @@
     string DistrictName { get; set; }
     string ResearchTopicName { get; set; }
     string ResearchTopicDescription { get; set; }
+    string ResearchTopicObjective { get; set; }
     ResearchTopic? researchTopicModel;
     Guid researchTopicGuid { get => researchTopicModel == null ? creatingGuid : researchTopicModel.Id; }
-    void OnDistrictChanged(Guid publisherId)
+    void OnDistrictChanged(District district)
     {
-
-        if (publisherId == creatingGuid)
+        if (district != null)
         {
-            createNewDistrict = true;
-        }
-        else
-        {
-            createNewDistrict = false;
-            var district = districts.FirstOrDefault(p => p.Id == publisherId);
-            if (district != null)
-            {
-                Model.DistrictId = district.Id;
-            }
+            Model.DistrictId = district.Id;
         }
     }
     void OnResearchTopicChanged(Guid researchTopicId)
@@ -341,12 +313,10 @@
     }
     protected override void OnInitialized()
     {
-        districts = publisherService.Table.ToList();
         researchTopics = researchTopicService.Table.ToList();
-        provinces = districts.Select(d=> d.Province).Distinct().ToList();
     }
     bool processing;
-    async void AddResearchTopic()
+    void AddResearchTopic()
     {
         if (string.IsNullOrWhiteSpace(ResearchTopicName) || string.IsNullOrWhiteSpace(ResearchTopicDescription))
         {
@@ -360,25 +330,9 @@
             researchTopicModel = researchTopics.FirstOrDefault(j => j.Title.Equals(ResearchTopicName, StringComparison.OrdinalIgnoreCase));
             ResearchTopicName = string.Empty;
             ResearchTopicDescription = string.Empty;
-            processing = false;           
+            processing = false;
             StateHasChanged();
         }
     }
-    void AddDistrict()
-    {
-        if (string.IsNullOrWhiteSpace(DistrictName))
-        {
-            return;
-        }
-        if (!districts.Any(p => p.Name.Equals(DistrictName, StringComparison.OrdinalIgnoreCase)))
-        {
-            var district = new District { Name = DistrictName };
-            publisherService.Save(district);
-            districts = publisherService.Table.ToList();
-            Model.DistrictId = districts.FirstOrDefault(p => p.Name.Equals(DistrictName, StringComparison.OrdinalIgnoreCase)).Id;
-            DistrictName = string.Empty;
-            StateHasChanged();
-        }
 
-    }
 }

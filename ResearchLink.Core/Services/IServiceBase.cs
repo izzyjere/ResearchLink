@@ -6,4 +6,5 @@ public interface IServiceBase<TEntity> where TEntity : class, IEntity
     Result Delete(Guid id);
     TEntity? Get(Guid id);
     Result Save(TEntity entity);
+    Result Save(IEnumerable<TEntity> entities);
 }

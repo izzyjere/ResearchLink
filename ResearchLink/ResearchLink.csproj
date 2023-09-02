@@ -7,6 +7,7 @@
 	<ItemGroup>
 		<PackageReference Include="Blazor.Bootstrap" Version="1.10.0" />
 		<PackageReference Include="Codelabs.SimpleAuthentication" Version="2.0.5" />
+		<PackageReference Include="DragZoneInputFile" Version="1.0.0" />
 		<PackageReference Include="Hangfire" Version="1.8.5" />
 		<PackageReference Include="Hangfire.SqlServer" Version="1.8.5" />
 		<PackageReference Include="Humanizer" Version="2.14.1" />
@@ -20,6 +21,7 @@
 		<ProjectReference Include="..\ResearchLink.Core\ResearchLink.Core.csproj" />
 	</ItemGroup>
 	<ItemGroup>
+	  <Folder Include="Files\Data\" />
 	  <Folder Include="wwwroot\css\fontawesome\" />
 	  <Folder Include="wwwroot\plugin\bootstrap\" />
 	</ItemGroup>

@@ -43,4 +43,5 @@ app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 app.UseHangfireDashboard();
 app.InitFileStoreCleaner();
+app.SeedDistricts();
 app.Run();

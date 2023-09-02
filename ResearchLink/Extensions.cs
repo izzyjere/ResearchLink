@@ -3,6 +3,8 @@ using Hangfire;
 using ResearchLink.Core.Misc;
 using System.ComponentModel;
 using Microsoft.JSInterop;
+using ResearchLink.Core.Services;
+using System.Text.Json;
 
 public static class Extensions
 {
@@ -39,5 +41,20 @@ public static class Extensions
         var fi = value.GetType().GetField(value.ToString());
         var attributes = (DescriptionAttribute[])fi.GetCustomAttributes(typeof(DescriptionAttribute), false);
         return attributes.Length > 0 ? attributes[0].Description : value.ToString();
-    }   
+    } 
+    public static void SeedDistricts(this IApplicationBuilder app)
+    {
+        var scope = app.ApplicationServices.CreateScope();
+        var service = scope.ServiceProvider.GetService<IDistrictService>();
+        if (service == null)
+        {
+            throw new Exception("Some services are missing: Name{IDistrictService}");
+        }
+        if(service.Table.Any()) return;
+        var filePath = Path.Combine(Environment.CurrentDirectory,"Files","Data", "districts.json");
+        var json = File.ReadAllText(filePath);
+        var districts = JsonSerializer.Deserialize<List<District>>(json);
+        if (districts == null || !districts.Any()) return;
+        service.Save(districts);
+    }
 }

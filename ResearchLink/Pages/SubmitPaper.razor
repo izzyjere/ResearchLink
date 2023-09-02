@@ -30,7 +30,7 @@
                             <div class="col-12 mb-3">
                                 <div class="form-group">
                                     <label for="district">District</label>
-                                    @if(researchGap is not null)
+                                    @if (researchGap is not null)
                                     {
                                         <InputText id="district" @bind-Value="@researchGap.District.Name" disabled class="form-control"></InputText>
                                     }
@@ -44,8 +44,8 @@
                                                       OnChanged="OnDistrictChanged"
                                                       Placeholder="Type district name"
                                                       PropertyName="Name" />
-                                        
-                                    }  
+
+                                    }
                                     <ValidationMessage For="()=>Model.DistrictId" />
                                 </div>
                             </div>
@@ -75,7 +75,9 @@
                                                 }
                                                 <option class="text-info" value="@creatingGuid">Create new researchTopic</option>
                                             </InputSelect>
-                                        }}
+                                        }
+                                        <ValidationMessage For="()=>Model.ResearchTopicId" />
+                                    }
                                 </div>
                             </div>
                             @if (researchGap is not null)
@@ -249,7 +251,7 @@
                     Type = ToastType.Danger
                 });
             return;
-        }        
+        }
         if (Model.ResearchTopicId == Guid.Empty)
         {
             toastService.Notify(new ToastMessage
@@ -274,7 +276,7 @@
         if (!confirmation)
         {
             return;
-        }      
+        }
         int order = 1;
         foreach (var author in articleAuthors)
         {

@@ -61,6 +61,7 @@
                                             <option class="text-info" value="@creatingGuid">Create new researchTopic</option>
                                         </InputSelect>
                                     }
+                                    <ValidationMessage For="()=>Model.ResearchTopicId" />
                                 </div>
                             </div>
                             <div col-12 mb-3>
@@ -159,13 +160,20 @@
     }
     async Task Submit()
     {
-        
+
         if(articleAuthors.Count==0)
         {
             var confirmation2 = await confirmDialog.ShowAsync("No Authors", "You have not selected authors to work on this research. Continue?", new ConfirmDialogOptions { IsVerticallyCentered=true, YesButtonText="Yes" });
             if (!confirmation2)
             {
                 return;
+            }
+        }
+        else
+        {
+            foreach(var item in articleAuthors)
+            {
+                Model.ProposedAuthors.Add(new ProposedAuthor { AuthorId = item.Id });
             }
         }
         var confirmation = await confirmDialog.ShowAsync("Confirm", "Are you sure you want to submit this research gap?", new ConfirmDialogOptions { IsVerticallyCentered=true, YesButtonText="Yes" });

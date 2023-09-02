@@ -75,7 +75,7 @@
                                     {
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                             <div class="me-3">
-                                                <img width="48" height="48" style="object-fit:contain !important;border-radius:50%" src="@(item.Author.HasAvatar? fileSystemHelper.ReadAsBlob(item?.Author?.Avatar):"https://via.placeholder.com/48E")" alt="User Profile" class="img-fluid">
+                                                <img width="40" height="40" style="object-fit:contain !important;border-radius:50%" src="@(item.Author.HasAvatar? fileSystemHelper.ReadAsBlob(item?.Author?.Avatar):"https://via.placeholder.com/40")" alt="User Profile" class="img-fluid">
 
                                                 <a href="profile?uid=@(item.Author.UserId)" class="link-normal">@item.Author.FullName</a>
                                             </div>

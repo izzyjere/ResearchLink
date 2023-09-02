@@ -121,7 +121,7 @@ namespace ResearchLink.Core.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("ResearchId")
+                    b.Property<Guid>("ResearchId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -402,13 +402,13 @@ namespace ResearchLink.Core.Migrations
                     b.HasOne("ResearchLink.Core.Models.Author", "Author")
                         .WithMany("Researchs")
                         .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ResearchLink.Core.Models.Research", "Research")
                         .WithMany("Authors")
                         .HasForeignKey("ResearchId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Author");
@@ -457,7 +457,7 @@ namespace ResearchLink.Core.Migrations
                     b.HasOne("ResearchLink.Core.Models.Research", "Research")
                         .WithMany()
                         .HasForeignKey("ResearchId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Research");
@@ -468,13 +468,13 @@ namespace ResearchLink.Core.Migrations
                     b.HasOne("ResearchLink.Core.Models.Author", "Author")
                         .WithMany()
                         .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ResearchLink.Core.Models.ResearchGap", "ResearchGap")
                         .WithMany("ProposedAuthors")
                         .HasForeignKey("ResearchGapId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Author");
@@ -487,7 +487,7 @@ namespace ResearchLink.Core.Migrations
                     b.HasOne("ResearchLink.Core.Models.District", "District")
                         .WithMany()
                         .HasForeignKey("DistrictId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("ResearchLink.Core.Models.ResearchGap", "ResearchGap")
@@ -497,7 +497,7 @@ namespace ResearchLink.Core.Migrations
                     b.HasOne("ResearchLink.Core.Models.ResearchTopic", "ResearchTopic")
                         .WithMany()
                         .HasForeignKey("ResearchTopicId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.OwnsOne("ResearchLink.Core.Shared.FileModel", "Document", b1 =>
@@ -543,7 +543,7 @@ namespace ResearchLink.Core.Migrations
                     b.HasOne("ResearchLink.Core.Models.ResearchTopic", "ResearchTopic")
                         .WithMany()
                         .HasForeignKey("ResearchTopicId")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.OwnsOne("ResearchLink.Core.Shared.FileModel", "Document", b1 =>
@@ -583,7 +583,9 @@ namespace ResearchLink.Core.Migrations
                 {
                     b.HasOne("ResearchLink.Core.Models.Research", "Research")
                         .WithMany("Comments")
-                        .HasForeignKey("ResearchId");
+                        .HasForeignKey("ResearchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Research");
                 });
@@ -592,7 +594,9 @@ namespace ResearchLink.Core.Migrations
                 {
                     b.HasOne("ResearchLink.Core.Models.ResearchGap", "Research")
                         .WithMany("Comments")
-                        .HasForeignKey("ResearchId");
+                        .HasForeignKey("ResearchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Research");
                 });

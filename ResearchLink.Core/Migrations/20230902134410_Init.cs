@@ -228,7 +228,7 @@ namespace ResearchLink.Core.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ResearchId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ResearchId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     User = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -242,12 +242,14 @@ namespace ResearchLink.Core.Migrations
                         name: "FK_Comment_ResearchGap_ResearchId",
                         column: x => x.ResearchId,
                         principalTable: "ResearchGap",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_Comment_Research_ResearchId",
                         column: x => x.ResearchId,
                         principalTable: "Research",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(

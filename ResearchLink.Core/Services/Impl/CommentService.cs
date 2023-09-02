@@ -1,9 +1,16 @@
 ﻿namespace ResearchLink.Core.Services.Impl
 {
     [Service]
-    internal class CommentService : ServiceBase<Comment>, ICommentService
+    internal class ResearchGapCommentService : ServiceBase<ResearchGapComment>, IResearchGapCommentService
     {
-        public CommentService(DatabaseContext context) : base(context)
+        public ResearchGapCommentService(DatabaseContext context) : base(context)
+        {
+        }
+    } 
+    [Service]
+    internal class ResearchCommentService : ServiceBase<ResearchComment>, IResearchCommentService
+    {
+        public ResearchCommentService(DatabaseContext context) : base(context)
         {
         }
     }   

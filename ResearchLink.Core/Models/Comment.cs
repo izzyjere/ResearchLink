@@ -4,7 +4,7 @@ namespace ResearchLink.Core.Models
 {
     public abstract class Comment : Entity
     {
-        public virtual Guid? ResearchId { get; set; }
+        public virtual Guid ResearchId { get; set; }
         [Required(ErrorMessage = "Please provide a comment")]
         [MaxLength(250,ErrorMessage = "Comment cannot be more than 250 characters")]
         public string Content { get; set; }

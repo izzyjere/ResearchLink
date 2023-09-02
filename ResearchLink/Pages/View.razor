@@ -184,7 +184,7 @@
     CommentReply commentReply;
     ClaimsPrincipal? currentUser;
     bool savingData;
-
+    List<Comment> comments = new List<Comment>();
     protected override async Task OnInitializedAsync()
     {
         currentUser = (await AuthenticationStateTask).User;
@@ -246,7 +246,9 @@
     {
         savingData = true;
         commentModel.Content = EncodeEmojis(commentModel.Content);
-        var save = commentService.Save(commentModel);
+        commentModel.ResearchId = Model.Id;
+        commentModel.SetResearchId();
+        var save = researchCommentService.Save(commentModel);
         if (save.Succeded)
         {
             await ReloadData();
@@ -257,14 +259,14 @@
         }
         savingData = false;
     }
-    async void AddReply(Comment comment)
+    async void AddReply(ResearchComment comment)
     {
         savingData = true;
         commentReply.Content = EncodeEmojis(commentReply.Content);
         commentReply.CreatedDate = DateTime.Now;
         comment.Replies ??= new List<CommentReply>();
         comment.Replies.Add(commentReply);
-        var save = commentService.Save(comment);
+        var save = researchCommentService.Save(comment);
         if (save.Succeded)
         {
             comment.Replying = false;

@@ -4,8 +4,15 @@ namespace ResearchLink.Core.Models
 {
     public class ResearchGapComment : Comment
     {
-        public override Guid? ResearchId { get; set; }
+        public override Guid ResearchId { get; set; }
         [ForeignKey(nameof(ResearchId))]
-        public ResearchGap? Research { get; set; }       
+        public ResearchGap Research { get; set; }
+        public void SetResearchId()
+        {
+            if (Research != null)
+            {
+                ResearchId = base.ResearchId;
+            }
+        }
     }
 }

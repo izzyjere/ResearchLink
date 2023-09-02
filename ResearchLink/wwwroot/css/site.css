@@ -143,3 +143,7 @@ a, .btn-link {
     font-size: small;
 }
 
+.link-normal {
+    text-decoration: none !important;
+    color: var(--primary) !important;
+}

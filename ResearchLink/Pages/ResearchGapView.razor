@@ -1,5 +1,6 @@
 ﻿@page "/research/gap/view"
 @using System.Globalization;
+@using System.Text;
 <div class="container mt-5">
     @if (Model is null)
     {
@@ -57,27 +58,48 @@
                         <div class="row p-4">
                             @if (Model.ProposedAuthors.Any())
                             {
-                                <h6>Proposed Authors</h6>
-                                <ul style="max-height:250px" class="list-group overflow-auto">
-                                    @foreach (var item in Model.ProposedAuthors)
-                                    {
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <div class="me-3">
-                                                <img style="object-fit:contain !important;" src="@(item.Author.HasAvatar? fileSystemHelper.ReadAsBlob(item?.Author?.Avatar):$"generateAvatar/{item.Author.Initials}/40/40/5")" alt="User Profile" class="img-fluid">
+                                <div class="col-12">
+                                    <h6>Proposed Authors</h6>
+                                    <ul style="max-height:250px" class="list-group overflow-auto">
+                                        @foreach (var item in Model.ProposedAuthors)
+                                        {
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div class="me-3">
+                                                    <img style="object-fit:contain !important;" src="@(item.Author.HasAvatar? fileSystemHelper.ReadAsBlob(item?.Author?.Avatar):$"generateAvatar/{item.Author.Initials}/40/40/5")" alt="User Profile" class="img-fluid">
 
-                                                <a href="profile?uid=@(item.Author.UserId)" class="link-normal">@item.Author.FullName</a>
-                                            </div>
+                                                    <a href="profile?uid=@(item.Author.UserId)" class="link-normal">@item.Author.FullName</a>
+                                                </div>
 
-                                            <span class="badge badge-primary badge-pill">1</span>
-                                        </li>
-                                    }
+                                                <span class="badge badge-primary badge-pill">1</span>
+                                            </li>
+                                        }
 
-                                </ul>
+                                    </ul>
+                               </div>
+                                
                             }
-                            else
+                            else if (Model.Researches.Any())
                             {
-                                <AuthorisedLink Class="link-normal" Href=@($"submit?gap={Model.Id}")>Submit a reasearch for this gap</AuthorisedLink>
-                            }
+                                <div class="col-12">
+                                    <h6>Research Done on Gap</h6>
+                                    <ul style="max-height:250px" class="list-group overflow-auto">
+                                        @foreach (var item in Model.Researches)
+                                        {
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                <div class="me-3">
+                                                    <a href="research?p=@(item.Id)" class="link-normal">@item.Title </a>
+                                                     (@GetAuthorNames(item))
+                                                </div>                                                
+                                            </li>
+                                        }
+
+                                    </ul>
+                                </div>
+                                
+                            } 
+                            <div class="col-6">
+                                <AuthorisedLink Class="btn btn-primary mt-4" Href=@($"submit?gap={Model.Id}")>Submit a reasearch</AuthorisedLink>
+                            </div>                           
                         </div>
                     </div>
                     <div class="col-12">
@@ -149,8 +171,8 @@
                 {
                     <a href="submit/gap?p=@(Model.Id)" class="btn btn-success mx-4"><i class="fas fa-edit"></i> Edit</a>
                 }
-                <button @onclick="DownloadPaper" class="btn btn-danger"><i class="fas fa-file-pdf"></i> Download PDF</button>
-                <button @onclick="async ()=> await viewDocModal.ShowAsync()" class="btn btn-info"><i class="fas fa-file"></i> View</button>
+                <button disabled="@(Model.Document == null)" @onclick="DownloadPaper" class="btn btn-danger"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                <button disabled="@(Model.Document == null)" @onclick="async ()=>  await viewDocModal.ShowAsync()" class="btn btn-info"><i class="fas fa-file"></i> View</button>
             </CardFooter>
         </Card>
         <Modal @ref=@viewDocModal Size="ModalSize.Large" ShowCloseButton IsVerticallyCentered>
@@ -299,4 +321,20 @@
         });
         return decodedText;
     }
+    MarkupString GetAuthorNames(Research article)
+    {
+        var authors = article.Authors.Select(a => a.Author).ToList();
+        var stringBuilder = new StringBuilder();
+        var index = 1;
+        @foreach (var item in authors)
+        {
+            stringBuilder.Append($"<a class='link-normal' href='profile?uid={item.UserId}'>{item.Name}</a>");
+            if (index != authors.Count)
+            {
+                stringBuilder.Append(", ");
+            }
+        }
+        return new MarkupString(stringBuilder.ToString());
+    }
+       
 }

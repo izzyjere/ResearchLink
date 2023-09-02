@@ -30,40 +30,63 @@
                             <div class="col-12 mb-3">
                                 <div class="form-group">
                                     <label for="district">District</label>
-                                    <AutoComplete @bind-Value="@DistrictName"
-                                                  ElementId="district"
-                                                  DataProvider="DistrictDataProvider"
-                                                  TItem="District"
-                                                  StringComparison="StringComparison.OrdinalIgnoreCase"
-                                                  OnChanged="OnDistrictChanged"
-                                                  Placeholder="Type district name"
-                                                  PropertyName="Name" />
+                                    @if(researchGap is not null)
+                                    {
+                                        <InputText id="district" @bind-Value="@researchGap.District.Name" disabled class="form-control"></InputText>
+                                    }
+                                    else
+                                    {
+                                        <AutoComplete @bind-Value="@DistrictName"
+                                                      ElementId="district"
+                                                      DataProvider="DistrictDataProvider"
+                                                      TItem="District"
+                                                      StringComparison="StringComparison.OrdinalIgnoreCase"
+                                                      OnChanged="OnDistrictChanged"
+                                                      Placeholder="Type district name"
+                                                      PropertyName="Name" />
+                                        
+                                    }  
                                     <ValidationMessage For="()=>Model.DistrictId" />
                                 </div>
                             </div>
                             <div class="col-12 mb-3">
                                 <div class="form-group">
                                     <label for="researchTopic">ResearchTopic</label>
-                                    @if (createNewResearchTopic && researchTopicModel == null)
+                                    @if (researchGap is not null)
                                     {
-                                        <InputText placeholder="New research popic title" id="researchTopic" @bind-Value="@ResearchTopicName" class="form-control" />
-                                        <InputText placeholder="New research popic description" id="researchTopicDescription" @bind-Value="@ResearchTopicDescription" class="form-control mt-2" />
-                                        <InputText placeholder="New research popic objective" id="objective" @bind-Value="@ResearchTopicObjective" class="form-control mt-2" />
-                                        <Icon class="mt-2" Color="IconColor.Info" title="save topic" @onclick="AddResearchTopic" Name="@IconName.WindowPlus"></Icon>
+                                        <InputText id="researchTopic" @bind-Value="@researchGap.ResearchTopic.Title" disabled class="form-control"></InputText>
                                     }
                                     else
                                     {
-                                        <InputSelect id="researchTopic" TValue="Guid" ValueExpression="()=>(researchTopicGuid)" ValueChanged="OnResearchTopicChanged" class="form-select">
-                                            <option value="@Guid.Empty">Select researchTopic</option>
-                                            @foreach (var item in researchTopics)
-                                            {
-                                                <option value="@item.Id">@item.Title</option>
-                                            }
-                                            <option class="text-info" value="@creatingGuid">Create new researchTopic</option>
-                                        </InputSelect>
-                                    }
+                                        @if (createNewResearchTopic && researchTopicModel == null)
+                                        {
+                                            <InputText placeholder="New research popic title" id="researchTopic" @bind-Value="@ResearchTopicName" class="form-control" />
+                                            <InputText placeholder="New research popic description" id="researchTopicDescription" @bind-Value="@ResearchTopicDescription" class="form-control mt-2" />
+                                            <InputText placeholder="New research popic objective" id="objective" @bind-Value="@ResearchTopicObjective" class="form-control mt-2" />
+                                            <Icon class="mt-2" Color="IconColor.Info" title="save topic" @onclick="AddResearchTopic" Name="@IconName.WindowPlus"></Icon>
+                                        }
+                                        else
+                                        {
+                                            <InputSelect id="researchTopic" TValue="Guid" ValueExpression="()=>(researchTopicGuid)" ValueChanged="OnResearchTopicChanged" class="form-select">
+                                                <option value="@Guid.Empty">Select researchTopic</option>
+                                                @foreach (var item in researchTopics)
+                                                {
+                                                    <option value="@item.Id">@item.Title</option>
+                                                }
+                                                <option class="text-info" value="@creatingGuid">Create new researchTopic</option>
+                                            </InputSelect>
+                                        }}
                                 </div>
                             </div>
+                            @if (researchGap is not null)
+                            {
+                                <div col-12 mb-3>
+                                    <div class="form-group">
+                                        <label for="research-gap">Research Gap</label>
+                                        <InputText id="research-gap" @bind-Value="@researchGap.Title" disabled class="form-control"></InputText>
+                                    </div>
+                                </div>
+                            }
                             <div col-12 mb-3>
                                 <div class="form-group">
                                     <label for="authors">Author(s)</label>
@@ -121,13 +144,17 @@
     ClaimsPrincipal? claimsPrincipal { get; set; }
     List<Author> authors = new List<Author>();
     List<Author> articleAuthors = new List<Author>();
-    string articleAuthor, articleTitle; 
+    string articleAuthor, articleTitle;
 
     FileModel? documentFile;
     ConfirmDialog dialog;
     [Parameter]
     [SupplyParameterFromQuery(Name = "p")]
     public Guid Id { get; set; }
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "gap")]
+    public Guid ResearchGapId { get; set; }
+    ResearchGap? researchGap;
     private async Task<AutoCompleteDataProviderResult<Author>> AuthorsDataProvider(AutoCompleteDataProviderRequest<Author> request)
     {
 
@@ -157,6 +184,22 @@
                     {
                         Model = model;
                         StateHasChanged();
+                    }
+
+                }
+                else if (ResearchGapId != Guid.Empty)
+                {
+                    researchGap = researchGapService.Get(ResearchGapId);
+                    if (researchGap is not null)
+                    {
+                        Model.ResearchGapId = researchGap.Id;
+                        Model.ResearchTopicId = researchGap.ResearchTopicId;
+                        Model.Title = "Resolve: " + researchGap.Title;
+                        Model.DistrictId = researchGap.DistrictId;
+                    }
+                    else
+                    {
+                        Navigation.NavigateTo("/submit", true);
                     }
 
                 }
@@ -206,8 +249,8 @@
                     Type = ToastType.Danger
                 });
             return;
-        }
-        if(Model.ResearchTopicId == Guid.Empty)
+        }        
+        if (Model.ResearchTopicId == Guid.Empty)
         {
             toastService.Notify(new ToastMessage
                 {
@@ -231,7 +274,7 @@
         if (!confirmation)
         {
             return;
-        }
+        }      
         int order = 1;
         foreach (var author in articleAuthors)
         {
@@ -249,7 +292,7 @@
         {
             toastService.Notify(new ToastMessage { Title="Error", Message = "Paper submission failed.", Type=ToastType.Danger, IconName=IconName.Exclamation });
         }
-    }  
+    }
 
     async Task OnFileUpload(InputFileChangeEventArgs args)
     {

@@ -22,6 +22,7 @@
         public ResearchTopic ResearchTopic { get; set; }
         public ICollection<ProposedAuthor> ProposedAuthors { get; set; }    
         public ICollection<ResearchGapComment> Comments { get; set; }
+        public virtual ICollection<Research> Researches { get; set; }
         public FileModel? Document { get; set; }
         public ResearchGap()
         {

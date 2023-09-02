@@ -17,15 +17,6 @@
                     </div>
                     @if (searchModel.Advanced)
                     {
-                       @*  <div class="col-4">
-                            <label for="type">Research Type</label>
-                            <InputSelect @bind-Value="@searchModel.Type" id="type" class="form-select">
-                                @foreach (ResearchType item in Enum.GetValues(typeof(ResearchType)))
-                                {
-                                    <option value="@item">@item.GetDescription()</option>
-                                }
-                            </InputSelect>
-                        </div> *@
                         <div class="col-4">
                             <label for="startDate">Published Date</label>
                             <DateInput @bind-Value="@searchModel.StartDate" TValue="DateOnly" ElementId="startDate"></DateInput>

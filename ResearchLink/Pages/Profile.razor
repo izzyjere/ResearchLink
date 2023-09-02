@@ -56,7 +56,7 @@
                                 else
                                 {
                                     @Model.Biography <br/>
-                                    <Button Class="mt-4" @onclick='()=>Navigation.NavigateTo($"/?author={Model.UserId}",true)' Color="ButtonColor.Primary">View Publications</Button>
+                                    <a class="btn btn-primary mt-4" href='@($"/?author={Model.UserId}")'>View Publications</a>
                                 }
 
                             </p>

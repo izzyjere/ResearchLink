@@ -229,7 +229,7 @@
         comment.ResearchId = Model.Id;
         return comment;
     }
-    void InitReply(Comment comment)
+    void InitReply(ResearchComment comment)
     {
         commentReply = new CommentReply();
         if (currentUser?.Identity != null && currentUser.Identity.IsAuthenticated)

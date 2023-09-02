@@ -45,50 +45,47 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseSimpleAuthentication();
-app.MapGet("generateAvatar/{initials}/{height}/{width}/{padding}", (string initials, int height, int width,int padding) =>
+app.MapFallbackToPage("/_Host");
+app.MapBlazorHub();
+app.MapGet("/generateAvatar/{initials}/{height}/{width}/{padding}", (string initials, int height, int width, int padding) =>
 {
-  
+
     // Calculate the actual size of the content area within the padded space
     int contentWidth = width - 2 * padding;
     int contentHeight = height - 2 * padding;
 
-    using (var bitmap = new Bitmap(width, height))
-    using (var graphics = Graphics.FromImage(bitmap))
-    {
-        // Create a circular clipping path
-        GraphicsPath path = new GraphicsPath();
-        path.AddEllipse(0, 0, width, height);
-        graphics.SetClip(path);
+    using var bitmap = new Bitmap(width, height);
+    using var graphics = Graphics.FromImage(bitmap);
+    // Create a circular clipping path
+    GraphicsPath path = new GraphicsPath();
+    path.AddEllipse(0, 0, width, height);
+    graphics.SetClip(path);
 
-        // Background color
-        var bgColor = ColorTranslator.FromHtml("#ECF0F1"); // You can change the color as needed
-        graphics.FillRectangle(new SolidBrush(bgColor), 0, 0, width, height);
+    // Background color
+    var bgColor = ColorTranslator.FromHtml("#ECF0F1"); // You can change the color as needed
+    graphics.FillRectangle(new SolidBrush(bgColor), 0, 0, width, height);
 
-        // Text settings
-        var font = new Font("Arial", Math.Min(contentWidth, contentHeight) / 2);
-        var textColor = Color.Black; // Text color
+    // Text settings
+    var font = new Font("Arial", Math.Min(contentWidth, contentHeight) / 2);
+    var textColor = Color.Black; // Text color
 
-        // Measure the size of the initials text
-        var textSize = graphics.MeasureString(initials, font);
+    // Measure the size of the initials text
+    var textSize = graphics.MeasureString(initials, font);
 
-        // Calculate the position to center the initials within the padded area
-        float x = padding + (contentWidth - textSize.Width) / 2;
-        float y = padding + (contentHeight - textSize.Height) / 2;
+    // Calculate the position to center the initials within the padded area
+    float x = padding + (contentWidth - textSize.Width) / 2;
+    float y = padding + (contentHeight - textSize.Height) / 2;
 
-        // Draw initials
-        graphics.DrawString(initials, font, new SolidBrush(textColor), x, y);
+    // Draw initials
+    graphics.DrawString(initials, font, new SolidBrush(textColor), x, y);
 
-        // Convert to MemoryStream
-        using (var memoryStream = new MemoryStream())
-        {
-            bitmap.Save(memoryStream, ImageFormat.Png);
+    // Convert to MemoryStream
+    using var memoryStream = new MemoryStream();
+    bitmap.Save(memoryStream, ImageFormat.Png);
 
-            // Return as a file stream result
-            return Results.File(memoryStream.ToArray(),"image/png",$"{initials}_avatar.png");
-        }
-    }
+    // Return as a file stream result
+    return Results.File(memoryStream.ToArray(), "image/png", $"{initials}_avatar.png");
 });
-app.MapFallbackToPage("/_Host");
 app.UseHangfireDashboard();
 app.InitFileStoreCleaner();
 app.SeedDistricts();

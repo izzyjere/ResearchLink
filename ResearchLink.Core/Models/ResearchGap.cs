@@ -8,6 +8,8 @@
         public string ProposerEmail { get; set; }
         public Guid ReseaechTopicId { get; set; }
         public ResearchTopic ResearchTopic { get; set; }
-        public ICollection<ProposedAuthor> ProposedAuthors { get; set; }         
+        public ICollection<ProposedAuthor> ProposedAuthors { get; set; }    
+        public ICollection<ResearchGapComment> Comments { get; set; }
+        public FileModel? Document { get; set; }
     }
 }

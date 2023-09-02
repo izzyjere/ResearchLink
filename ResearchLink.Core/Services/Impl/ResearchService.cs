@@ -6,6 +6,6 @@
         public ResearchService(DatabaseContext context) : base(context)
         {
         }
-    }
+    } 
 
 }

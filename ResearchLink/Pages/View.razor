@@ -180,7 +180,7 @@
     bool isMyResearch;
     [CascadingParameter]
     Task<AuthenticationState> AuthenticationStateTask { get; set; }
-    Comment commentModel;
+    ResearchComment commentModel;
     CommentReply commentReply;
     ClaimsPrincipal? currentUser;
     bool savingData;
@@ -205,7 +205,7 @@
         }
         if (Model != null)
         {
-            Model.Comments ??= new List<Comment>();
+            Model.Comments ??= new List<ResearchComment>();
         }
         commentModel = InitComment();
         commentReply = new CommentReply();
@@ -215,9 +215,9 @@
     {
         await javaScriptRuntime.InvokeVoidAsync("downloadFile", new { blob = fileSystemHelper.ReadAsBlob(Model.Document), fileName = $"link_{Model.Title.Replace(" ", "_").Substring(0, 10)}.pdf" });
     }
-    Comment InitComment()
+    ResearchComment InitComment()
     {
-        var comment = new Comment();
+        var comment = new ResearchComment();
         if (currentUser?.Identity != null && currentUser.Identity.IsAuthenticated)
         {
             comment.User = currentUser.GetFullName();

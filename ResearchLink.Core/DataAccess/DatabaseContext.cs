@@ -39,15 +39,22 @@ public class DatabaseContext : DbContext
            {
                av.ToTable("ResearchDocuments");               
                av.WithOwner();
+           }); 
+        modelBuilder.Entity<ResearchGap>()
+           .OwnsOne(a => a.Document, av =>
+           {
+               av.ToTable("ResearchGapDocuments");               
+               av.WithOwner();
            });
         modelBuilder.Entity<Comment>(comment =>
         {
            comment.OwnsMany(c => c.Replies, reply =>
            {
                reply.ToTable("CommentReplies");
-               reply.WithOwner(r=>r.Comment);
+               reply.WithOwner();
            });
         });
+       
         foreach (var entityType in entityTypes)
         {
             var entity = modelBuilder.Entity(entityType);

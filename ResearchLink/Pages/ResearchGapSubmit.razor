@@ -1,0 +1,42 @@
+﻿@page "/submit/gap"
+@using ResearchLink.Core.Shared;
+<div class="container mt-5">
+    <h3>@(Id!=Guid.Empty ? "Edit" : "Submit a") research gap</h3>
+    <EditForm Model="@Model">
+        <DataAnnotationsValidator />
+        <div class="row">
+
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    ResearchGap? Model = new();
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "p")]
+    public Guid Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (Id != Guid.Empty)
+        {
+            Model = await researchGapService.Table.FirstOrDefaultAsync(x => x.Id==Id);
+        }
+    }
+    async Task Submit()
+    {
+        var result = researchGapService.Save(Model);
+        if(result.Succeded)
+        {
+            toastService.Notify(new ToastMessage(ToastType.Success,"Research gap submitted successfully"));
+            Navigation.NavigateTo($"/research/gap?author={Model.ProposerEmail.Replace("@", "_").Replace(".", "_")}");
+        }
+        else
+        {
+            toastService.Notify(new ToastMessage(ToastType.Danger, "An error occured while submitting research gap"));
+        }      
+    }
+}
+@code{
+    FileModel? documentModel;
+}

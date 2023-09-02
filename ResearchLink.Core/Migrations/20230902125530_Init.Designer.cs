@@ -12,7 +12,7 @@ using ResearchLink.Core.DataAccess;
 namespace ResearchLink.Core.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20230828101019_Init")]
+    [Migration("20230902125530_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -120,7 +120,11 @@ namespace ResearchLink.Core.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("ResearchId")
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("ResearchId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("UpdatedDate")
@@ -132,9 +136,11 @@ namespace ResearchLink.Core.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ResearchId");
-
                     b.ToTable("Comment");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Comment");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("ResearchLink.Core.Models.District", b =>
@@ -150,15 +156,14 @@ namespace ResearchLink.Core.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("ProvinceId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<string>("Province")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ProvinceId");
 
                     b.ToTable("District");
                 });
@@ -227,32 +232,16 @@ namespace ResearchLink.Core.Migrations
                     b.ToTable("ProposedAuthor");
                 });
 
-            modelBuilder.Entity("ResearchLink.Core.Models.Province", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime?>("UpdatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Province");
-                });
-
             modelBuilder.Entity("ResearchLink.Core.Models.Research", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Abstract")
+                        .IsRequired()
+                        .HasMaxLength(10000)
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
@@ -260,15 +249,13 @@ namespace ResearchLink.Core.Migrations
                     b.Property<DateTime>("DatePublished")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(10000)
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid>("DistrictId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Pages")
+                    b.Property<Guid?>("ResearchGapId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ResearchMethod")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("ResearchTopicId")
@@ -284,6 +271,8 @@ namespace ResearchLink.Core.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DistrictId");
+
+                    b.HasIndex("ResearchGapId");
 
                     b.HasIndex("ResearchTopicId");
 
@@ -311,12 +300,11 @@ namespace ResearchLink.Core.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ResearchMethod")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid>("ReseaechTopicId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ResearchQuestion")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid>("ResearchTopicId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -326,6 +314,8 @@ namespace ResearchLink.Core.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ResearchTopicId");
 
                     b.ToTable("ResearchGap");
                 });
@@ -357,6 +347,24 @@ namespace ResearchLink.Core.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ResearchTopic");
+                });
+
+            modelBuilder.Entity("ResearchLink.Core.Models.ResearchComment", b =>
+                {
+                    b.HasBaseType("ResearchLink.Core.Models.Comment");
+
+                    b.HasIndex("ResearchId");
+
+                    b.HasDiscriminator().HasValue("ResearchComment");
+                });
+
+            modelBuilder.Entity("ResearchLink.Core.Models.ResearchGapComment", b =>
+                {
+                    b.HasBaseType("ResearchLink.Core.Models.Comment");
+
+                    b.HasIndex("ResearchId");
+
+                    b.HasDiscriminator().HasValue("ResearchGapComment");
                 });
 
             modelBuilder.Entity("ResearchLink.Core.Models.Author", b =>
@@ -397,13 +405,13 @@ namespace ResearchLink.Core.Migrations
                     b.HasOne("ResearchLink.Core.Models.Author", "Author")
                         .WithMany("Researchs")
                         .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("ResearchLink.Core.Models.Research", "Research")
                         .WithMany("Authors")
                         .HasForeignKey("ResearchId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Author");
@@ -413,12 +421,6 @@ namespace ResearchLink.Core.Migrations
 
             modelBuilder.Entity("ResearchLink.Core.Models.Comment", b =>
                 {
-                    b.HasOne("ResearchLink.Core.Models.Research", "Research")
-                        .WithMany("Comments")
-                        .HasForeignKey("ResearchId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.OwnsMany("ResearchLink.Core.Models.CommentReply", "Replies", b1 =>
                         {
                             b1.Property<Guid>("CommentId")
@@ -446,26 +448,11 @@ namespace ResearchLink.Core.Migrations
 
                             b1.ToTable("CommentReplies", (string)null);
 
-                            b1.WithOwner("Comment")
+                            b1.WithOwner()
                                 .HasForeignKey("CommentId");
-
-                            b1.Navigation("Comment");
                         });
 
                     b.Navigation("Replies");
-
-                    b.Navigation("Research");
-                });
-
-            modelBuilder.Entity("ResearchLink.Core.Models.District", b =>
-                {
-                    b.HasOne("ResearchLink.Core.Models.Province", "Province")
-                        .WithMany()
-                        .HasForeignKey("ProvinceId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Province");
                 });
 
             modelBuilder.Entity("ResearchLink.Core.Models.Document", b =>
@@ -473,7 +460,7 @@ namespace ResearchLink.Core.Migrations
                     b.HasOne("ResearchLink.Core.Models.Research", "Research")
                         .WithMany()
                         .HasForeignKey("ResearchId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Research");
@@ -484,13 +471,13 @@ namespace ResearchLink.Core.Migrations
                     b.HasOne("ResearchLink.Core.Models.Author", "Author")
                         .WithMany()
                         .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("ResearchLink.Core.Models.ResearchGap", "ResearchGap")
                         .WithMany("ProposedAuthors")
                         .HasForeignKey("ResearchGapId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Author");
@@ -503,13 +490,17 @@ namespace ResearchLink.Core.Migrations
                     b.HasOne("ResearchLink.Core.Models.District", "District")
                         .WithMany()
                         .HasForeignKey("DistrictId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.HasOne("ResearchLink.Core.Models.ResearchGap", "ResearchGap")
+                        .WithMany()
+                        .HasForeignKey("ResearchGapId");
 
                     b.HasOne("ResearchLink.Core.Models.ResearchTopic", "ResearchTopic")
                         .WithMany()
                         .HasForeignKey("ResearchTopicId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.OwnsOne("ResearchLink.Core.Shared.FileModel", "Document", b1 =>
@@ -545,7 +536,68 @@ namespace ResearchLink.Core.Migrations
                     b.Navigation("Document")
                         .IsRequired();
 
+                    b.Navigation("ResearchGap");
+
                     b.Navigation("ResearchTopic");
+                });
+
+            modelBuilder.Entity("ResearchLink.Core.Models.ResearchGap", b =>
+                {
+                    b.HasOne("ResearchLink.Core.Models.ResearchTopic", "ResearchTopic")
+                        .WithMany()
+                        .HasForeignKey("ResearchTopicId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.OwnsOne("ResearchLink.Core.Shared.FileModel", "Document", b1 =>
+                        {
+                            b1.Property<Guid>("ResearchGapId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("ContentType")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<string>("FileName")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.Property<int>("FileStore")
+                                .HasColumnType("int");
+
+                            b1.Property<string>("Path")
+                                .IsRequired()
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.HasKey("ResearchGapId");
+
+                            b1.ToTable("ResearchGapDocuments", (string)null);
+
+                            b1.WithOwner()
+                                .HasForeignKey("ResearchGapId");
+                        });
+
+                    b.Navigation("Document");
+
+                    b.Navigation("ResearchTopic");
+                });
+
+            modelBuilder.Entity("ResearchLink.Core.Models.ResearchComment", b =>
+                {
+                    b.HasOne("ResearchLink.Core.Models.Research", "Research")
+                        .WithMany("Comments")
+                        .HasForeignKey("ResearchId");
+
+                    b.Navigation("Research");
+                });
+
+            modelBuilder.Entity("ResearchLink.Core.Models.ResearchGapComment", b =>
+                {
+                    b.HasOne("ResearchLink.Core.Models.ResearchGap", "Research")
+                        .WithMany("Comments")
+                        .HasForeignKey("ResearchId");
+
+                    b.Navigation("Research");
                 });
 
             modelBuilder.Entity("ResearchLink.Core.Models.Author", b =>
@@ -562,6 +614,8 @@ namespace ResearchLink.Core.Migrations
 
             modelBuilder.Entity("ResearchLink.Core.Models.ResearchGap", b =>
                 {
+                    b.Navigation("Comments");
+
                     b.Navigation("ProposedAuthors");
                 });
 #pragma warning restore 612, 618

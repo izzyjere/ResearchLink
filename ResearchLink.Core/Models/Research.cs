@@ -15,7 +15,7 @@ public class Research  : Entity
     public int Year => DatePublished.Year;
     public string? ResearchMethod { get; set; }
     public FileModel Document { get; set; }
-    public ICollection<Comment> Comments { get; set; }
+    public ICollection<ResearchComment> Comments { get; set; }
     public Guid ResearchTopicId { get; set; }
     public ResearchTopic ResearchTopic { get; set; }    
     public Guid? ResearchGapId { get; set; }

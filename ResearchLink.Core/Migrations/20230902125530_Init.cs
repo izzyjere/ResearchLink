@@ -34,36 +34,18 @@ namespace ResearchLink.Core.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Province",
+                name: "District",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Province = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Province", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ResearchGap",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ResearchQuestion = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ResearchMethod = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Proposer = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ProposerEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ResearchGap", x => x.Id);
+                    table.PrimaryKey("PK_District", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -100,28 +82,32 @@ namespace ResearchLink.Core.Migrations
                         column: x => x.AuthorId,
                         principalTable: "Author",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(
-                name: "District",
+                name: "ResearchGap",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ProvinceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Proposer = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProposerEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ReseaechTopicId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ResearchTopicId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_District", x => x.Id);
+                    table.PrimaryKey("PK_ResearchGap", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_District_Province_ProvinceId",
-                        column: x => x.ProvinceId,
-                        principalTable: "Province",
+                        name: "FK_ResearchGap_ResearchTopic_ResearchTopicId",
+                        column: x => x.ResearchTopicId,
+                        principalTable: "ResearchTopic",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(
@@ -142,13 +128,13 @@ namespace ResearchLink.Core.Migrations
                         column: x => x.AuthorId,
                         principalTable: "Author",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_ProposedAuthor_ResearchGap_ResearchGapId",
                         column: x => x.ResearchGapId,
                         principalTable: "ResearchGap",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(
@@ -157,11 +143,12 @@ namespace ResearchLink.Core.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", maxLength: 10000, nullable: false),
+                    Abstract = table.Column<string>(type: "nvarchar(max)", maxLength: 10000, nullable: false),
                     DistrictId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DatePublished = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Pages = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ResearchMethod = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ResearchTopicId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ResearchGapId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
@@ -173,13 +160,39 @@ namespace ResearchLink.Core.Migrations
                         column: x => x.DistrictId,
                         principalTable: "District",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_Research_ResearchGap_ResearchGapId",
+                        column: x => x.ResearchGapId,
+                        principalTable: "ResearchGap",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Research_ResearchTopic_ResearchTopicId",
                         column: x => x.ResearchTopicId,
                         principalTable: "ResearchTopic",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ResearchGapDocuments",
+                columns: table => new
+                {
+                    ResearchGapId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Path = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ContentType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FileStore = table.Column<int>(type: "int", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ResearchGapDocuments", x => x.ResearchGapId);
+                    table.ForeignKey(
+                        name: "FK_ResearchGapDocuments_ResearchGap_ResearchGapId",
+                        column: x => x.ResearchGapId,
+                        principalTable: "ResearchGap",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(
@@ -201,13 +214,13 @@ namespace ResearchLink.Core.Migrations
                         column: x => x.AuthorId,
                         principalTable: "Author",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_AuthorResearch_Research_ResearchId",
                         column: x => x.ResearchId,
                         principalTable: "Research",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(
@@ -215,9 +228,10 @@ namespace ResearchLink.Core.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ResearchId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ResearchId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Content = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
                     User = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
@@ -225,11 +239,15 @@ namespace ResearchLink.Core.Migrations
                 {
                     table.PrimaryKey("PK_Comment", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Comment_ResearchGap_ResearchId",
+                        column: x => x.ResearchId,
+                        principalTable: "ResearchGap",
+                        principalColumn: "Id");
+                    table.ForeignKey(
                         name: "FK_Comment_Research_ResearchId",
                         column: x => x.ResearchId,
                         principalTable: "Research",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -253,7 +271,7 @@ namespace ResearchLink.Core.Migrations
                         column: x => x.ResearchId,
                         principalTable: "Research",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(
@@ -274,7 +292,7 @@ namespace ResearchLink.Core.Migrations
                         column: x => x.ResearchId,
                         principalTable: "Research",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateTable(
@@ -296,7 +314,7 @@ namespace ResearchLink.Core.Migrations
                         column: x => x.CommentId,
                         principalTable: "Comment",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateIndex(
@@ -313,11 +331,6 @@ namespace ResearchLink.Core.Migrations
                 name: "IX_Comment_ResearchId",
                 table: "Comment",
                 column: "ResearchId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_District_ProvinceId",
-                table: "District",
-                column: "ProvinceId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Document_ResearchId",
@@ -340,8 +353,18 @@ namespace ResearchLink.Core.Migrations
                 column: "DistrictId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Research_ResearchGapId",
+                table: "Research",
+                column: "ResearchGapId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Research_ResearchTopicId",
                 table: "Research",
+                column: "ResearchTopicId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ResearchGap_ResearchTopicId",
+                table: "ResearchGap",
                 column: "ResearchTopicId");
         }
 
@@ -367,13 +390,13 @@ namespace ResearchLink.Core.Migrations
                 name: "ResearchDocuments");
 
             migrationBuilder.DropTable(
+                name: "ResearchGapDocuments");
+
+            migrationBuilder.DropTable(
                 name: "Comment");
 
             migrationBuilder.DropTable(
                 name: "Author");
-
-            migrationBuilder.DropTable(
-                name: "ResearchGap");
 
             migrationBuilder.DropTable(
                 name: "Research");
@@ -382,10 +405,10 @@ namespace ResearchLink.Core.Migrations
                 name: "District");
 
             migrationBuilder.DropTable(
-                name: "ResearchTopic");
+                name: "ResearchGap");
 
             migrationBuilder.DropTable(
-                name: "Province");
+                name: "ResearchTopic");
         }
     }
 }

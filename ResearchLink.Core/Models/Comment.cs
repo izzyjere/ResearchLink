@@ -2,16 +2,15 @@
 
 namespace ResearchLink.Core.Models
 {
-    public class Comment : Entity
+    public abstract class Comment : Entity
     {
-        public Guid ResearchId { get; set; }
+        public virtual Guid? ResearchId { get; set; }
         [Required(ErrorMessage = "Please provide a comment")]
         [MaxLength(250,ErrorMessage = "Comment cannot be more than 250 characters")]
         public string Content { get; set; }
-        public string User { get; set; }
-        public Research Research { get; set; }
-        public ICollection<CommentReply> Replies { get; set; }
+        public string User { get; set; }        
+        public virtual ICollection<CommentReply> Replies { get; set; }
         [NotMapped]
         public bool Replying { get; set; }  
-    }
+    }   
 }

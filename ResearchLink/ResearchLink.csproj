@@ -21,7 +21,6 @@
 		<ProjectReference Include="..\ResearchLink.Core\ResearchLink.Core.csproj" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Folder Include="Files\Data\" />
 	  <Folder Include="wwwroot\css\fontawesome\" />
 	  <Folder Include="wwwroot\plugin\bootstrap\" />
 	</ItemGroup>

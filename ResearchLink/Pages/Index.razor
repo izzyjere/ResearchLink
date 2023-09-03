@@ -161,11 +161,11 @@
         }
         await LoadResearchs();
     }
-    async Task GoToPage(int pageNumber)
+    void GoToPage(int pageNumber)
     {
         if (pageModel == null|| pageNumber == pageModel?.PageNumber || pageNumber == 0 || pageNumber>pageModel?.TotalPages)
             return;
-        pageModel = await pageModel.GoToPage(pageNumber);
+        pageModel = pageModel.GoToPage(pageNumber);
     }
     async Task LoadResearchs(int page = 1, int size = 2, bool search = false, IQueryable<Research> query = default)
     {
@@ -230,17 +230,19 @@
             toastService.Notify(new ToastMessage(ToastType.Danger, e.Message));
         }
     }
-    async Task SearchAsync()
+    Task SearchAsync()
     {
+        preloadService.Show(SpinnerColor.Warning);
         var pageRequest = new PageRequest(1, 2);
         if (string.IsNullOrWhiteSpace(searchModel.SearchText) && !searchModel.Advanced)
         {
-            return;
+            preloadService.Hide();
+            return Task.CompletedTask;
         }
         else if (!string.IsNullOrWhiteSpace(searchModel.SearchText) && searchModel.Advanced)
         {
 
-            var query = articleService.Table.ToList().Where(a => a.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+            var query = articleService.Table.ToHashSet().Where(a => a.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
                                         //a.Abstract.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
                                         a.ResearchTopic.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
                                         a.ResearchTopic.Description.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
@@ -254,13 +256,13 @@
                                             a.CreatedDate >= searchModel.StartDate.ToDateTime(new TimeOnly(0, 0, 0)) &&
                                             a.CreatedDate <= searchModel.EndDate.ToDateTime(new TimeOnly(0, 0, 0)
                                          )));
-            pageModel = await query.AsQueryable().GetPageAsync(pageRequest);
+            pageModel =  query.GetPage(pageRequest);
             StateHasChanged();
 
         }
         else if (!string.IsNullOrWhiteSpace(searchModel.SearchText))
         {
-            var query = articleService.Table.ToList().Where(a => a.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+            var query = articleService.Table.ToHashSet().Where(a => a.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
                                              //a.Abstract.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
                                              a.ResearchTopic.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
                                              a.ResearchTopic.Description.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
@@ -269,19 +271,20 @@
                                              a.Authors.Any(a => a.Author.FirstName.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
                                              a.Authors.Any(a => a.Author.LastName.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
                                              a.Authors.Any(a => a.Author.EmailAddress.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)));                                      
-            pageModel = await query.AsQueryable().GetPageAsync(pageRequest);
-            await InvokeAsync(StateHasChanged);
+            pageModel = query.GetPage(pageRequest);
+            StateHasChanged();
         }
         else if (searchModel.Advanced)
         {
-            var query = articleService.Table.ToList().Where(a => (
+            var query = articleService.Table.ToHashSet().Where(a => (
                                             a.District.Name == searchModel.District || string.IsNullOrEmpty(searchModel.District)) &&(a.ResearchTopic.Title == searchModel.Topic || string.IsNullOrEmpty(searchModel.Topic)) &&
                                             a.CreatedDate >= searchModel.StartDate.ToDateTime(new TimeOnly(0, 0, 0)) &&
                                             a.CreatedDate <= searchModel.EndDate.ToDateTime(new TimeOnly(0, 0, 0)));
-            pageModel = await query.AsQueryable().GetPageAsync(pageRequest);
+            pageModel = query.GetPage(pageRequest);
             StateHasChanged();
         }
-
+        preloadService.Hide();
+        return Task.CompletedTask;
     }
 
     class SearchModel

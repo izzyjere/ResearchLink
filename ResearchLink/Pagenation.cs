@@ -17,6 +17,18 @@ namespace ResearchLink
                 TotalPages = totalPages,
                 Items = items               
             };
+        }
+        public  static Page<T> GetPage<T>(this IEnumerable<T> table, PageRequest pageRequest) where T:class, IEntity
+        {              
+            var count =  table.Count();
+            var totalPages = (int)Math.Ceiling(count / (double)pageRequest.PageSize);
+            var items = table.OrderByDescending(a => a.CreatedDate).Skip((pageRequest.PageNumber - 1) * pageRequest.PageSize).Take(pageRequest.PageSize).ToList();
+            return new Page<T> (table)
+            {
+                PageNumber = pageRequest.PageNumber,
+                TotalPages = totalPages,
+                Items = items               
+            };
         }   
     }
     public class Page<T> where T:class,IEntity
@@ -29,14 +41,18 @@ namespace ResearchLink
         {
             _query = query;   
         }
+        public Page(IEnumerable<T> items)
+        {
+           _query = items.AsQueryable();
+        }
         public Page()
         {
                 
         }
-        public async Task<Page<T>> GoToPage(int pageNumber)
+        public Page<T> GoToPage(int pageNumber)
         {
             var pageRequest = new PageRequest(pageNumber, 2);
-            return await _query.GetPageAsync(pageRequest);
+            return _query.GetPage(pageRequest);
         }
     }
     public record PageRequest (int PageNumber,int PageSize);

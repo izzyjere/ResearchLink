@@ -1,25 +1,55 @@
-﻿.nav-item {
-    font-size: large;
-    padding-top: 0;
-    padding-bottom: 0;
+﻿
+:root {
+    --bs-navbar-active-color: blue;
 }
-    
-    .active {
-        border-radius: 50px;
-        background-color: #007bff;
-        color: #fff;
-        height : fit-content
+.nav-item {
+    padding: 8px;
+}
+
+    .nav-item:hover {       
+        padding: 0;
+        font-size:large;
     }
-/* Custom CSS for user profile in navbar */
+
+    .nav-link:hover {
+        color: blue !important;
+    }
+
+
+.active {
+    border-radius: 50px;
+    background-color: #007bff;
+    color: #fff;
+    height: fit-content
+}
+
+Custom CSS for user profile in navbar
 .user-profile {
     display: flex;
     align-items: center;
     margin-right: auto;
 }
 
-    .user-profile img {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        margin-right: 10px;
+.user-profile img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+body {
+    font-family: "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    background-color: #fff;
+    height: 200vh;
+    position: relative;
+}
+
+a {
+    -webkit-transition: .3s all ease;
+    -o-transition: .3s all ease;
+    transition: .3s all ease;
+}
+
+    a, a:hover {
+        text-decoration: none !important;
     }

@@ -17,13 +17,41 @@
                     </div>
                     @if (searchModel.Advanced)
                     {
-                        <div class="col-4">
-                            <label for="startDate">Published Date</label>
-                            <DateInput @bind-Value="@searchModel.StartDate" TValue="DateOnly" ElementId="startDate"></DateInput>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="district">District</label>
+                                <InputSelect id="district" class="form-select" @bind-Value="@searchModel.District">
+                                    <option value="@string.Empty">All</option>
+                                    @foreach (var district in districtService.Table.ToList())
+                                    {
+                                        <option value="@district.Name">@district.Name</option>
+                                    }
+                                </InputSelect>
+                            </div>
                         </div>
-                        <div class="col-4">
-                            <label for="endDate">Published Date</label>
-                            <DateInput @bind-Value="@searchModel.EndDate" ElementId="endDate" TValue="DateOnly"></DateInput>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="topic">Topic</label>
+                                <InputSelect id="topic" class="form-select" @bind-Value="@searchModel.Topic">
+                                    <option value="@string.Empty">All</option>
+                                    @foreach (var district in researchTopicService.Table.ToList())
+                                    {
+                                        <option value="@district.Title">@district.Title</option>
+                                    }
+                                </InputSelect>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="startDate">Published Date</label>
+                                <DateInput @bind-Value="@searchModel.StartDate" TValue="DateOnly" ElementId="startDate"></DateInput>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="endDate">Published Date</label>
+                                <DateInput @bind-Value="@searchModel.EndDate" ElementId="endDate" TValue="DateOnly"></DateInput>
+                            </div>
                         </div>
                     }
                 </div>
@@ -115,8 +143,8 @@
 </div>
 @code {
     Page<ResearchGap>? pageModel;
-    SearchModel searchModel = new SearchModel();    
-    IQueryable<ResearchGap>? query = null;
+    SearchModel searchModel = new SearchModel();
+    IQueryable<ResearchGap>? mainQuery = null;
     [Parameter]
     [SupplyParameterFromQuery(Name = "researcher")]
     public Guid AuthorId { get; set; }
@@ -124,32 +152,28 @@
     {
         if (AuthorId != Guid.Empty)
         {
-            query = researchGapService.Table.Where(a => a.ProposedAuthors.Any(a => a.Author.UserId == AuthorId));
+            mainQuery = researchGapService.Table.Where(a => a.ProposedAuthors.Any(a => a.Author.UserId == AuthorId));
         }
         else
         {
-            query = researchGapService.Table;
+            mainQuery = researchGapService.Table;
         }
-        await LoadResearchs();
+        await LoadData();
     }
     async Task GoToPage(int pageNumber)
     {
-        if (pageNumber == pageModel?.PageNumber || pageNumber == 0 || pageNumber>pageModel?.TotalPages)
+        if (pageModel == null|| pageNumber == pageModel?.PageNumber || pageNumber == 0 || pageNumber>pageModel?.TotalPages)
             return;
-        await LoadResearchs(pageNumber);
+        pageModel = await pageModel.GoToPage(pageNumber);
     }
-    async Task LoadResearchs(int page = 1, int size = 2, bool search = false)
+    async Task LoadData(int page = 1, int size = 2)
     {
 
         try
         {
             preloadService.Show(SpinnerColor.Warning);
-            if (search && query == null)
-            {
-                throw new Exception("Search without parameters is not supported.");
-            }
             var pageRequest = new PageRequest(page, size);
-            pageModel = await (query ??= researchGapService.Table).GetPageAsync(pageRequest);
+            pageModel = await (mainQuery ??= researchGapService.Table).GetPageAsync(pageRequest);
             await InvokeAsync(StateHasChanged);
         }
         catch (Exception e)
@@ -193,10 +217,12 @@
         {
             toastService.Notify(new ToastMessage(ToastType.Danger, e.Message));
         }
-       
+
     }
     async Task SearchAsync()
     {
+        preloadService.Show(SpinnerColor.Warning);
+        var pageRequest = new PageRequest(1, 2);
         if (string.IsNullOrWhiteSpace(searchModel.SearchText) && !searchModel.Advanced)
         {
             return;
@@ -204,30 +230,50 @@
         else if (!string.IsNullOrWhiteSpace(searchModel.SearchText) && searchModel.Advanced)
         {
 
-            query = query.Where(a => a.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
-                                       a.Proposer.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
-                                       a.Description.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
-                                       a.ProposedAuthors.Any(a => a.Author.Name.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
-                                       a.ProposedAuthors.Any(a => a.Author.EmailAddress.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
-                                       a.CreatedDate >= searchModel.StartDate.ToDateTime(new TimeOnly(0, 0, 0)) &&
-                                       a.CreatedDate <= searchModel.EndDate.ToDateTime(new TimeOnly(0, 0, 0)));
-            await LoadResearchs(search: true);
+            var query = researchGapService.Table.ToList().Where(a => a.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                        a.Proposer.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                        a.Description.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                        a.ResearchTopic.Description.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                        a.ResearchTopic.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                        a.District.Name.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                        a.District.Province.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                        a.ProposedAuthors.Any(a => a.Author.FirstName.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
+                                        a.ProposedAuthors.Any(a => a.Author.LastName.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
+                                        a.ProposedAuthors.Any(a => a.Author.EmailAddress.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
+                                        (
+                                             (a.District.Name == searchModel.District || string.IsNullOrEmpty(searchModel.District)) &&(a.ResearchTopic.Title == searchModel.Topic || string.IsNullOrEmpty(searchModel.Topic)) &&
+                                             a.CreatedDate >= searchModel.StartDate.ToDateTime(new TimeOnly(0, 0, 0)) &&
+                                             a.CreatedDate <= searchModel.EndDate.ToDateTime(new TimeOnly(0, 0, 0)
+                                        )));
+            pageModel = await query.AsQueryable().GetPageAsync(pageRequest);
+            StateHasChanged();
 
         }
         else if (!string.IsNullOrWhiteSpace(searchModel.SearchText))
         {
-            query = query.Where(a => a.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+            var query = researchGapService.Table.ToList().Where(a => a.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
                                            a.Proposer.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
-                                       a.Description.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
-                                       a.ProposedAuthors.Any(a => a.Author.Name.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
-                                       a.ProposedAuthors.Any(a => a.Author.EmailAddress.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)));
-            await LoadResearchs(search: true);
+                                           a.Description.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                           a.ResearchTopic.Title.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                           a.ResearchTopic.Description.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                           a.District.Name.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                           a.District.Province.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase) ||
+                                           a.ProposedAuthors.Any(a => a.Author.FirstName.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
+                                           a.ProposedAuthors.Any(a => a.Author.LastName.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
+                                           a.ProposedAuthors.Any(a => a.Author.EmailAddress.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)));
+            pageModel = await query.AsQueryable().GetPageAsync(pageRequest);
+            StateHasChanged();
+
         }
         else if (searchModel.Advanced)
         {
-            query = query.Where(a => a.CreatedDate >= searchModel.StartDate.ToDateTime(new TimeOnly(0, 0, 0)) &&
-                                           a.CreatedDate <= searchModel.EndDate.ToDateTime(new TimeOnly(0, 0, 0)));
-            await LoadResearchs(search: true);
+            var query = researchGapService.Table.ToList().Where(a =>
+               (a.District.Name == searchModel.District || string.IsNullOrEmpty(searchModel.District)) &&( a.ResearchTopic.Title == searchModel.Topic || string.IsNullOrEmpty(searchModel.Topic)) &&
+               a.CreatedDate >= searchModel.StartDate.ToDateTime(new TimeOnly(0, 0, 0)) &&
+               a.CreatedDate <= searchModel.EndDate.ToDateTime(new TimeOnly(0, 0, 0)            
+            ));
+           pageModel = await query.AsQueryable().GetPageAsync(pageRequest);
+           StateHasChanged();
         }
 
     }
@@ -239,5 +285,7 @@
         public DateOnly EndDate { get; set; } = DateOnly.FromDateTime(DateTime.Today);
         public bool Advanced { get; set; }
         public bool IsSearching => !string.IsNullOrWhiteSpace(SearchText) || Advanced;
+        public string District { get; set; }
+        public string Topic { get; set; }
     }
 }

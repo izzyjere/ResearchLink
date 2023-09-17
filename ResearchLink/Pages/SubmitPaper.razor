@@ -2,6 +2,7 @@
 @page "/edit"
 @using DragZoneInputFile
 @using ResearchLink.Core.Shared;
+@attribute [Authorize(Roles = RoleConstants.Researcher)]
 <div class="container mt-5">
     <h3>@(Id!=Guid.Empty ? "Edit" : "Submit a") research</h3>
     <EditForm Model="@Model" OnValidSubmit="SubmitPaperAsync">
@@ -51,7 +52,7 @@
                             </div>
                             <div class="col-12 mb-3">
                                 <div class="form-group">
-                                    <label for="researchTopic">ResearchTopic</label>
+                                    <label for="researchTopic">Research Area</label>
                                     @if (researchGap is not null)
                                     {
                                         <InputText id="researchTopic" @bind-Value="@researchGap.ResearchTopic.Title" disabled class="form-control"></InputText>
@@ -60,9 +61,9 @@
                                     {
                                         @if (createNewResearchTopic && researchTopicModel == null)
                                         {
-                                            <InputText placeholder="New research popic title" id="researchTopic" @bind-Value="@ResearchTopicName" class="form-control" />
-                                            <InputText placeholder="New research popic description" id="researchTopicDescription" @bind-Value="@ResearchTopicDescription" class="form-control mt-2" />
-                                            <InputText placeholder="New research popic objective" id="objective" @bind-Value="@ResearchTopicObjective" class="form-control mt-2" />
+                                            <InputText placeholder="New research area title" id="researchTopic" @bind-Value="@ResearchTopicName" class="form-control" />
+                                            <InputText placeholder="New research area description" id="researchTopicDescription" @bind-Value="@ResearchTopicDescription" class="form-control mt-2" />
+                                            <InputText placeholder="New research area objective" id="objective" @bind-Value="@ResearchTopicObjective" class="form-control mt-2" />
                                             <Icon class="mt-2" Color="IconColor.Info" title="save topic" @onclick="AddResearchTopic" Name="@IconName.WindowPlus"></Icon>
                                         }
                                         else
@@ -84,7 +85,7 @@
                             {
                                 <div col-12 mb-3>
                                     <div class="form-group">
-                                        <label for="research-gap">Research Gap</label>
+                                        <label for="research-gap">Research Topic</label>
                                         <InputText id="research-gap" @bind-Value="@researchGap.Title" disabled class="form-control"></InputText>
                                     </div>
                                 </div>

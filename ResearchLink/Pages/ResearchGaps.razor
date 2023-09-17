@@ -1,4 +1,5 @@
 ﻿@page "/research/gap"
+@attribute [Authorize(Roles = RoleConstants.Researcher)]
 @using System.Text;
 @using System.Text.RegularExpressions;
 <div class="container mt-5">
@@ -6,7 +7,7 @@
         <div class="col-md-6">
             <EditForm Model="@searchModel" OnValidSubmit="SearchAsync">
                 <div class="input-group">
-                    <InputText @bind-Value="@searchModel.SearchText" class="form-control" placeholder="Search for submited research gaps..." />
+                    <InputText @bind-Value="@searchModel.SearchText" class="form-control" placeholder="Search for submited research topics..." />
                     <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Search</button>
                 </div>
                 <div class="row advanced-search">

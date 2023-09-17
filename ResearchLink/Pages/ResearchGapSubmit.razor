@@ -2,7 +2,7 @@
 @using DragZoneInputFile
 @using ResearchLink.Core.Shared;
 <div class="container mt-5">
-    <h3>@(Id!=Guid.Empty ? "Edit" : "Submit a") research gap</h3>
+    <h3>@(Id!=Guid.Empty ? "Edit" : "Submit a") research topic</h3>
     <EditForm OnValidSubmit="Submit" Model="@Model">
         <DataAnnotationsValidator />
         <div class="row">
@@ -42,12 +42,12 @@
                             </div>
                             <div class="col-12 mb-3">
                                 <div class="form-group">
-                                    <label for="researchTopic">ResearchTopic</label>
+                                    <label for="researchTopic">Research Area</label>
                                     @if (createNewResearchTopic)
                                     {
-                                        <InputText placeholder="New research popic title" id="researchTopic" @bind-Value="@ResearchTopicName" class="form-control" />
-                                        <InputText placeholder="New research popic description" id="researchTopicDescription" @bind-Value="@ResearchTopicDescription" class="form-control mt-2" />
-                                        <InputText placeholder="New research popic objective" id="objective" @bind-Value="@ResearchTopicObjective" class="form-control mt-2" />
+                                        <InputText placeholder="Name" id="researchTopic" @bind-Value="@ResearchTopicName" class="form-control" />
+                                        <InputText placeholder="Description" id="researchTopicDescription" @bind-Value="@ResearchTopicDescription" class="form-control mt-2" />
+                                        <InputText placeholder="Objective" id="objective" @bind-Value="@ResearchTopicObjective" class="form-control mt-2" />
                                         <Icon class="mt-2" Color="IconColor.Info" title="save topic" @onclick="AddResearchTopic" Name="@IconName.WindowPlus"></Icon>
                                     }
                                     else

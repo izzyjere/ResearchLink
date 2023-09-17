@@ -20,8 +20,9 @@ builder.Services.AddServerSideBlazor();
 builder.Services.AddPaymentServices(options =>
 {
     options.AddPaymentOptions(PaymentOptions.MobileMoneyZambia); // can add multiple payment methods
+    options.AddPaymentOptions(PaymentOptions.Card); // can add multiple payment methods
     options.Title = "Research Link Payment";
-   // options.LogoLocation = "assets/img/logo.png";
+    options.LogoLocation = "favicon.png";
     options.Description = "Pay to access this resource";
     options.PublicKey = "FLWPUBK_TEST-803633b41c973f55bc42ac4fc753171f-X";
 });
@@ -96,5 +97,5 @@ app.MapGet("/generateAvatar/{initials}/{height}/{width}/{padding}", (string init
 app.UseHangfireDashboard();
 app.InitFileStoreCleaner();
 app.SeedDistricts();
-app.ConfigureRoles();
+//app.ConfigureRoles();
 app.Run();

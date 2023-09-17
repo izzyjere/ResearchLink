@@ -101,7 +101,7 @@
                                 <div col-12 mb-3>
                                     <div class="form-group">
                                         <label for="amount">Price (ZMW)</label>
-                                        <CurrencyInput EnableMinMax Min="1" Locale="en-ZM" CurrencySign="CurrencySign.Standard" ElementId="amount" @bind-Value="@Model.Price" disabled class="form-control"></CurrencyInput>
+                                        <CurrencyInput EnableMinMax Min="1" Locale="en-ZM" CurrencySign="CurrencySign.Standard" ElementId="amount" @bind-Value="@Model.Price" class="form-control"></CurrencyInput>
                                      </div>
                                  </div>
                             }
@@ -201,6 +201,7 @@
                     if (model is not null)
                     {
                         Model = model;
+                        documentFile = Model.Document;
                         StateHasChanged();
                     }
 

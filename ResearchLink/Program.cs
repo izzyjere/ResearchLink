@@ -23,7 +23,7 @@ builder.Services.AddPaymentServices(options =>
     options.Title = "Research Link Payment";
    // options.LogoLocation = "assets/img/logo.png";
     options.Description = "Pay to access this resource";
-    options.PublicKey = "FLWPUBK-da7f6e682771263e77ae9e8e6b0638c7-X";
+    options.PublicKey = "FLWPUBK_TEST-803633b41c973f55bc42ac4fc753171f-X";
 });
 builder.Services.AddBlazorBootstrap();
 builder.Services.AddHangfire(t =>
@@ -96,4 +96,5 @@ app.MapGet("/generateAvatar/{initials}/{height}/{width}/{padding}", (string init
 app.UseHangfireDashboard();
 app.InitFileStoreCleaner();
 app.SeedDistricts();
+app.ConfigureRoles();
 app.Run();

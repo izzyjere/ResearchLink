@@ -1,6 +1,7 @@
 ﻿global using ResearchLink.Core.Models;
 using Hangfire;
 using ResearchLink.Core.Misc;
+using ResearchLink;
 using System.ComponentModel;
 using Microsoft.JSInterop;
 using ResearchLink.Core.Services;
@@ -58,5 +59,37 @@ public static class Extensions
         var districts = JsonSerializer.Deserialize<List<District>>(json);
         if (districts == null || !districts.Any()) return;
         service.Save(districts);
+    }
+    public static void ConfigureRoles(this IApplicationBuilder app)
+    {
+        var scope = app.ApplicationServices.CreateScope();
+        var roleService = scope.ServiceProvider.GetRequiredService<IRoleService>();
+        var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+        var userManger = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
+        
+        Task.Run(async () =>
+        {
+            var role = await roleService.GetRoleByNameAsync(RoleConstants.Researcher);
+            if(role is null)
+            {
+                role = new Role(RoleConstants.Researcher, RoleConstants.Researcher);
+                await roleService.CreateAsync(role);
+            }
+            else { }
+            var usersWithRoles = await userService.GetAllInRoleAsync(RoleConstants.Researcher);
+            var usersToProcess = new List<string>();
+            await userManger.Users.ForEachAsync(async user =>
+            {
+               if(!usersWithRoles.Any(u=>u.Id == user.Id))
+               {
+                    usersToProcess.Add(user.UserName);
+               }  
+            });
+            usersToProcess.ForEach(async user =>
+            {
+                await Task.Run(async () => await userService.AddUserToRoleAsync(RoleConstants.Researcher, user));
+            });
+        }).GetAwaiter().GetResult();
+
     }
 }

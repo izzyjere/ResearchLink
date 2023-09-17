@@ -6,12 +6,15 @@
     {
         <Card>
             <CardHeader>You need to pay to access this research.</CardHeader>
-            <CardSubTitle>@ResearchModel.Title</CardSubTitle>
-            <CardBody>
+            <CardBody Class="p-4">
                 <table class="table table-striped table-bordered">
                     <tr>
+                        <td>Research Title</td>
+                        <td>@ResearchModel.Title</td>
+                    </tr>
+                    <tr>
                         <td>Price</td>
-                        <td> @ResearchModel.Price.Value.ToString("N2") ZMW</td>
+                        <td>@ResearchModel.Price.Value.ToString("N2") ZMW</td>
                     </tr>
                 </table>
             </CardBody>

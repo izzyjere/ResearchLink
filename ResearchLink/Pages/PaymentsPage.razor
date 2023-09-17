@@ -1,0 +1,50 @@
+﻿@page "/payments"
+@attribute [Authorize(Roles = RoleConstants.Researcher)]
+<div class="container pt-4 pa-3">
+    <h3>Payments</h3>
+    <div class="container-fluid pt-3">
+        <Grid TItem="Payment" class="table table-hover table-bordered table-striped" DataProvider="PaymentDataProvider" AllowFiltering="true" AllowPaging="true" Responsive="true">
+            <GridColumn TItem="Payment" HeaderText="Date" PropertyName="PaymentDate">
+                @context.PaymentDate.ToString("dd MMM, yyyy")
+            </GridColumn>
+            <GridColumn TItem="Payment" HeaderText="Amount" PropertyName="Amount">
+                @context.Amount.ToString("N")
+            </GridColumn>
+            <GridColumn TItem="Payment" HeaderText="Reference" PropertyName="TransactionReference">
+                @context.TransactionReference
+            </GridColumn>
+            <GridColumn TItem="Payment" HeaderText="PaymentMethod" PropertyName="PaymentMethod">
+                @context.PaymentMethod
+            </GridColumn>
+            <GridColumn TItem="Payment" HeaderText="Research" PropertyName="Research">
+                @context.Research.Title
+            </GridColumn>
+            <GridColumn TItem="Payment" HeaderText="Status" PropertyName="Status">
+                @context.Status
+            </GridColumn>
+        </Grid>
+    </div>
+</div>
+
+
+
+@code {
+    [CascadingParameter]
+    Task<AuthenticationState> AuthenticationStateTask { get; set; }
+    ClaimsPrincipal? claimsPrincipal;
+    IEnumerable<Payment> Data = Enumerable.Empty<Payment>();
+    protected override async Task OnInitializedAsync()
+    {
+        claimsPrincipal = (await AuthenticationStateTask).User;
+    }
+    private async Task<GridDataProviderResult<Payment>> PaymentDataProvider(GridDataProviderRequest<Payment> request)
+    {
+        if (claimsPrincipal?.Identity?.IsAuthenticated ?? false)
+        {
+            Data = await paymentService.Table
+            .Where(p => p.Research.Authors.Any(a => a.Author.UserId == claimsPrincipal.GetUserId())).ToListAsync();
+        }
+        return await Task.FromResult(request.ApplyTo(Data));
+    }
+
+}

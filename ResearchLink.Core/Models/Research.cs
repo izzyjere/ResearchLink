@@ -22,5 +22,7 @@ public class Research  : Entity
     public ResearchTopic ResearchTopic { get; set; }    
     public Guid? ResearchGapId { get; set; }
     public ResearchGap? ResearchGap { get; set; }
+    public bool Monetize { get; set; }
+    public decimal? Price { get; set; }
 }
 

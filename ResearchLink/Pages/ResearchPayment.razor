@@ -1,0 +1,122 @@
+﻿@page "/research/pay"
+@using System.Globalization
+<h3>Research Payment</h3>
+<div class="container mt-5">
+    @if (ResearchModel != null)
+    {
+        <Card>
+            <CardHeader>You need to pay to access this research.</CardHeader>
+            <CardSubTitle>@ResearchModel.Title</CardSubTitle>
+            <CardBody>
+                <table class="table table-striped table-bordered">
+                    <tr>
+                        <td>Price</td>
+                        <td> @ResearchModel.Price.Value.ToString("N2") ZMW</td>
+                    </tr>
+                </table>
+            </CardBody>
+            <CardFooter>
+                <CheckoutButton OnPaymentCancelled="FailedToPay" OnPaymentComplete="ProcessPayment" Model="@Model">Pay Now</CheckoutButton>
+            </CardFooter>
+        </Card>
+    }
+    else
+    {
+        <center><h6 class="text-primary mt-5">Loading ... </h6></center>
+    }
+</div>
+@code {
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "id")]
+    public Guid Id { get; set; }
+    Research? ResearchModel;
+    PaymentRequest? Model;
+    [CascadingParameter]
+    Task<AuthenticationState> AuthenticationStateTask { get; set; }
+    ClaimsPrincipal? claimsPrincipal;
+
+    protected override async Task OnInitializedAsync()
+    {
+        preloadService.Show();
+        claimsPrincipal = (await AuthenticationStateTask).User;
+        if (claimsPrincipal?.Identity?.IsAuthenticated ?? false)
+        {
+            if (Id != Guid.Empty)
+            {
+                ResearchModel = await articleService.Table.FirstOrDefaultAsync(x => x.Id == Id);
+                if (ResearchModel is null)
+                {
+                    Navigation.NavigateTo("/", true);
+                    return;
+                }
+                Model = new PaymentRequest
+                    {
+                        Amount = ResearchModel.Price.Value,
+                        Currency = "ZMW",
+                        Email = claimsPrincipal.GetPhone(),
+                        Phone ="0960000000",
+                        Customer = claimsPrincipal.GetFullName(),
+                        CustomerId = claimsPrincipal.GetUserId().ToString(),
+                        CustomerMac = claimsPrincipal.GetUserId().ToString(),
+                    };
+                preloadService.Hide();
+            }
+            else
+            {
+                Navigation.NavigateTo("/", true);
+            }
+        }
+        else
+        {
+            Navigation.NavigateTo($"login?next=research/pay?id={Id}", true);
+        }
+    }
+    async Task ProcessPayment(PaymentResponse response)
+    {
+        //Validate payment and save to db
+        var paymentModel = new Payment
+            {
+                Amount = Convert.ToDecimal(response.Amount),
+                FWReference = response.FWReference,
+                TransactionReference = response.TransactionReference,
+                Status = response.Status,
+                PaymentDate = DateTime.Now,
+                TransactionId = response.TransactionId,
+                Currency = response.Currency,
+                UserId = claimsPrincipal.GetUserId(),
+                PaymentMethod = "MobileMoney",
+                ResearchId = ResearchModel.Id
+            };
+        var saved = paymentService.Save(paymentModel);
+        if (saved.Succeded)
+        {
+            toastService.Notify(new ToastMessage
+                {
+                    Message = "Payment successfully processed.",
+                    IconName = IconName.Check2All,
+                    Type = ToastType.Success
+                });
+            await DownloadPaper();
+        }
+    }
+    void FailedToPay(string respose)
+    {
+        toastService.Notify(new ToastMessage
+            {
+                Message = "Payment failed to process.",
+                IconName = IconName.Exclamation,
+                Type = ToastType.Danger
+            });
+    }
+    async Task DownloadPaper()
+    {
+        try
+        {
+            await javaScriptRuntime.InvokeVoidAsync("downloadFile", new { blob = fileSystemHelper.ReadAsBlob(ResearchModel.Document), fileName = $"link_{ResearchModel.Title.Replace(" ", "_").Substring(0, 10)}.pdf" });
+        }
+        catch (Exception e)
+        {
+            toastService.Notify(new ToastMessage(ToastType.Danger, e.Message));
+        }
+    }
+}

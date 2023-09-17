@@ -90,6 +90,21 @@
                                     </div>
                                 </div>
                             }
+
+                            <div col-12 mb-3>
+                                <div class="form-group">
+                                    <Switch @bind-Value=Model.Monetize Label="Monetize Research" />
+                                </div>
+                            </div>
+                            @if (Model.Monetize)
+                            {
+                                <div col-12 mb-3>
+                                    <div class="form-group">
+                                        <label for="amount">Price (ZMW)</label>
+                                        <CurrencyInput EnableMinMax Min="1" Locale="en-ZM" CurrencySign="CurrencySign.Standard" ElementId="amount" @bind-Value="@Model.Price" disabled class="form-control"></CurrencyInput>
+                                     </div>
+                                 </div>
+                            }
                             <div col-12 mb-3>
                                 <div class="form-group">
                                     <label for="authors">Author(s)</label>
@@ -242,6 +257,16 @@
     }
     async void SubmitPaperAsync()
     {
+        if (Model.Monetize && (Model.Price ==null || Model.Price.Value < 1))
+        {
+            toastService.Notify(new ToastMessage
+                {
+                    Message = "You need to provide a price for the research.",
+                    IconName = IconName.Exclamation,
+                    Type = ToastType.Danger
+                });
+            return;
+        }
 
         if (articleAuthors.Count == 0)
         {

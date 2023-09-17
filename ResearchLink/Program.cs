@@ -4,9 +4,8 @@ using ResearchLink;
 
 using System.Drawing.Imaging;
 using System.Drawing;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using System.Drawing.Drawing2D;
+using CollegeApp.UI.RaveBindings;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("Default");
@@ -18,6 +17,14 @@ builder.Services.AddSimpleAuthentication(options =>
 });
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
+builder.Services.AddPaymentServices(options =>
+{
+    options.AddPaymentOptions(PaymentOptions.MobileMoneyZambia); // can add multiple payment methods
+    options.Title = "Research Link Payment";
+   // options.LogoLocation = "assets/img/logo.png";
+    options.Description = "Pay to access this resource";
+    options.PublicKey = "FLWPUBK-da7f6e682771263e77ae9e8e6b0638c7-X";
+});
 builder.Services.AddBlazorBootstrap();
 builder.Services.AddHangfire(t =>
 {

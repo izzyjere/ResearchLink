@@ -38,14 +38,14 @@
                                 <tr>
                                     <td class="text-bold">Topic:</td>
                                     <td>@Model?.ResearchTopic?.Title</td>
-                                </tr> 
-                                @if(Model.ResearchGap is not null)
+                                </tr>
+                                @if (Model.ResearchGap is not null)
                                 {
                                     <tr>
                                         <td class="text-bold">Research Gap:</td>
                                         <td><a href='@($"/research/gap/view?p={Model.ResearchGapId}")' class="link-normal">@Model?.ResearchGap?.Title</a></td>
                                     </tr>
-                                }                                
+                                }
                                 <tr>
                                     <td class="text-bold">District:</td>
                                     <td>@Model?.District?.Name</td>
@@ -152,8 +152,19 @@
                 {
                     <a href="edit?p=@(Model.Id)" class="btn btn-success mx-4"><i class="fas fa-edit"></i> Edit</a>
                 }
-                <button disabled="@(Model.Document == null)" @onclick="DownloadPaper" class="btn btn-danger"><i class="fas fa-file-pdf"></i> Download PDF</button>
-                <button disabled="@(Model.Document == null)" @onclick="async ()=> await viewDocModal.ShowAsync()" class="btn btn-info"><i class="fas fa-file"></i> View</button>
+                <AuthorizeView>
+                    <Authorized>
+                        @if (Model.Monetize)
+                        {
+                            <button disabled="@(Model.Document == null)" @onclick='()=>Navigation.NavigateTo($"research/pay?id={Model.Id}",true)' class="btn btn-danger"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                        }
+                        else
+                        {
+                            <button disabled="@(Model.Document == null)" @onclick="DownloadPaper" class="btn btn-danger"><i class="fas fa-file-pdf"></i> Download PDF</button>
+                            <button disabled="@(Model.Document == null)" @onclick="async ()=> await viewDocModal.ShowAsync()" class="btn btn-info"><i class="fas fa-file"></i> View</button>
+                        }
+                    </Authorized>
+                </AuthorizeView>
             </CardFooter>
         </Card>
         <Modal @ref=@viewDocModal Size="ModalSize.Large" ShowCloseButton IsVerticallyCentered>

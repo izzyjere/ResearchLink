@@ -36,6 +36,7 @@ public static class Extensions
     public static Guid GetUserId(this ClaimsPrincipal claimsPrincipal) => Guid.Parse(claimsPrincipal.FindFirstValue(ClaimTypes.NameIdentifier));
     public static string GetFullName(this ClaimsPrincipal claimsPrincipal) => claimsPrincipal.FindFirstValue("FullName");
     public static string GetEmail(this ClaimsPrincipal claimsPrincipal) => claimsPrincipal.FindFirstValue(ClaimTypes.Email);
+    public static string GetPhone(this ClaimsPrincipal claimsPrincipal) => claimsPrincipal.FindFirstValue(ClaimTypes.MobilePhone);
     //Read Abstract attribute from enum
     public static string GetDescription(this Enum value)
     {

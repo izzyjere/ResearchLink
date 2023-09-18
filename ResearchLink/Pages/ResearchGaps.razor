@@ -147,11 +147,18 @@
     [Parameter]
     [SupplyParameterFromQuery(Name = "researcher")]
     public Guid AuthorId { get; set; }
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "author")]
+    public string? Author { get; set; }
     protected override async Task OnInitializedAsync()
     {
         if (AuthorId != Guid.Empty)
         {
             mainQuery = researchGapService.Table.Where(a => a.ProposedAuthors.Any(a => a.Author.UserId == AuthorId));
+        }
+        else if(!string.IsNullOrEmpty(Author))
+        {
+            mainQuery = researchGapService.Table.Where(a => a.ProposerEmail.Replace("@", "_").Replace(".", "_")==Author);
         }
         else
         {

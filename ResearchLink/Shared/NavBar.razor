@@ -34,7 +34,11 @@
                                 <li><a class="dropdown-item" href="/">View All</a></li>
                                 <li><a Class="dropdown-item" Href="submit/gap">Submit a research gap</a></li>
                                 <li><hr class="dropdown-divider"></li>
-                                <li><AuthorisedLink Class="dropdown-item" Href="submit">Submit a paper</AuthorisedLink></li>
+                               <AuthorizeView Context="authContext" Roles="@RoleConstants.Researcher">
+                                  <Authorized>
+                                       <li><AuthorisedLink Class="dropdown-item" Href="submit">Submit a paper</AuthorisedLink></li>
+                                  </Authorized>
+                               </AuthorizeView>
                             </ul>
                         </li>
                     </Authorized>

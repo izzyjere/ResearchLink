@@ -154,7 +154,7 @@
                 }
                 <AuthorizeView>
                     <Authorized>
-                        @if (Model.Monetize)
+                        @if (Model.Monetize && !isMyResearch)
                         {
                             <button disabled="@(Model.Document == null)" @onclick='()=>Navigation.NavigateTo($"research/pay?id={Model.Id}",true)' class="btn btn-danger"><i class="fas fa-file-pdf"></i> Download PDF</button>
                         }

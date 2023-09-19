@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Class Name="ResearchLink.Core.Models.Author">
+    <Position X="5.5" Y="2.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEIAAAAAAsEAAASAAAwAgAAAAAAABAAAAgAAAEg=</HashCode>
+      <FileName>Models\Author.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ResearchLink.Core.Models.AuthorResearch">
+    <Position X="15.25" Y="2.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAAAAAgAAAAAQAAAAAAAAABBAAAAAAAAA=</HashCode>
+      <FileName>Models\AuthorResearch.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ResearchLink.Core.Models.Comment">
+    <Position X="11" Y="8.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAABAAAAAgAAAAAAAAAAAAQAIAAAAAAAAAAAAAAIAAA=</HashCode>
+      <FileName>Models\Comment.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ResearchLink.Core.Models.CommentReply" Collapsed="true">
+    <Position X="12.25" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAABAAAAAgAAAAAAAAAAAAAAAAAAAAAgAgAAAAAAAAA=</HashCode>
+      <FileName>Models\CommentReply.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ResearchLink.Core.Models.District">
+    <Position X="3.25" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAgAAAAA=</HashCode>
+      <FileName>Models\District.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ResearchLink.Core.Models.Document">
+    <Position X="18.25" Y="4.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAIAAAAIAAQAAAAAAAAABAAQAABAAAA=</HashCode>
+      <FileName>Models\Document.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ResearchLink.Core.Models.Payment">
+    <Position X="20.5" Y="8.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAABAAAEAAEAAAAAACAAACyACAAAAACABAAAAAAAAAA=</HashCode>
+      <FileName>Models\Payment.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ResearchLink.Core.Models.ProposedAuthor">
+    <Position X="22.75" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAACAAAAAAAgAAAAAAAAAAAAAIAABAAAAAAAAA=</HashCode>
+      <FileName>Models\ProposedAuthor.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ResearchLink.Core.Models.Research">
+    <Position X="11.25" Y="2.75" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQABDQAAAUAAAAAAAAIAAABAAAICFCAAAAAAIAQ=</HashCode>
+      <FileName>Models\Research.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ResearchLink.Core.Models.ResearchComment">
+    <Position X="6.25" Y="8" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAA=</HashCode>
+      <FileName>Models\ResearchComment.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ResearchLink.Core.Models.ResearchGap">
+    <Position X="15.5" Y="9.75" Width="3.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAQAAABAgAEAAAIAAAAAAAAAAAAACECAAAAABIAQ=</HashCode>
+      <FileName>Models\ResearchGap.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ResearchLink.Core.Models.ResearchGapComment">
+    <Position X="7.75" Y="10" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAA=</HashCode>
+      <FileName>Models\ResearchGapComment.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ResearchLink.Core.Models.ResearchTopic">
+    <Position X="8.75" Y="2.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAAgAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Models\ResearchTopic.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ResearchLink.Core.Shared.Entity">
+    <Position X="18.25" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAIAAAA=</HashCode>
+      <FileName>Shared\Entity.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Interface Name="ResearchLink.Core.Shared.IEntity" Collapsed="true">
+    <Position X="9.75" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAIAAAA=</HashCode>
+      <FileName>Shared\IEntity.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

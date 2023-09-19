@@ -16,7 +16,7 @@
                     </div>
                     @if (searchModel.Advanced)
                     {
-                        <div class="col-3">
+                        <div class="col-6">
                             <div class="form-group">
                                 <label for="district">District</label>
                                 <InputSelect id="district" class="form-select" @bind-Value="@searchModel.District">
@@ -28,7 +28,7 @@
                                 </InputSelect>
                             </div>
                         </div>
-                        <div class="col-3">
+                        <div class="col-6">
                             <div class="form-group">
                                 <label for="topic">Topic</label>
                                 <InputSelect id="topic" class="form-select" @bind-Value="@searchModel.Topic">
@@ -39,19 +39,7 @@
                                     }
                                 </InputSelect>
                             </div>
-                        </div>
-                        <div class="col-3">
-                            <div class="form-group">
-                                <label for="startDate">Published Date</label>
-                                <DateInput @bind-Value="@searchModel.StartDate" TValue="DateOnly" ElementId="startDate"></DateInput>
-                            </div>
-                        </div>
-                        <div class="col-3">
-                            <div class="form-group">
-                                <label for="endDate">Published Date</label>
-                                <DateInput @bind-Value="@searchModel.EndDate" ElementId="endDate" TValue="DateOnly"></DateInput>
-                            </div>
-                        </div>
+                        </div>                       
                     }
                 </div>
             </EditForm>
@@ -248,10 +236,7 @@
                                         a.ProposedAuthors.Any(a => a.Author.LastName.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
                                         a.ProposedAuthors.Any(a => a.Author.EmailAddress.Contains(searchModel.SearchText, StringComparison.OrdinalIgnoreCase)) ||
                                         (
-                                             (a.District.Name == searchModel.District || string.IsNullOrEmpty(searchModel.District)) &&(a.ResearchTopic.Title == searchModel.Topic || string.IsNullOrEmpty(searchModel.Topic)) &&
-                                             a.CreatedDate >= searchModel.StartDate.ToDateTime(new TimeOnly(0, 0, 0)) &&
-                                             a.CreatedDate <= searchModel.EndDate.ToDateTime(new TimeOnly(0, 0, 0)
-                                        )));
+                                             (a.District.Name == searchModel.District || string.IsNullOrEmpty(searchModel.District)) &&(a.ResearchTopic.Title == searchModel.Topic || string.IsNullOrEmpty(searchModel.Topic))));
             pageModel = query.GetPage(pageRequest);
             StateHasChanged();
 
@@ -275,10 +260,7 @@
         else if (searchModel.Advanced)
         {
             var query = researchGapService.Table.ToHashSet().Where(a =>
-               (a.District.Name == searchModel.District || string.IsNullOrEmpty(searchModel.District)) &&( a.ResearchTopic.Title == searchModel.Topic || string.IsNullOrEmpty(searchModel.Topic)) &&
-               a.CreatedDate >= searchModel.StartDate.ToDateTime(new TimeOnly(0, 0, 0)) &&
-               a.CreatedDate <= searchModel.EndDate.ToDateTime(new TimeOnly(0, 0, 0)            
-            ));
+               (a.District.Name == searchModel.District || string.IsNullOrEmpty(searchModel.District)) &&( a.ResearchTopic.Title == searchModel.Topic || string.IsNullOrEmpty(searchModel.Topic)));
             pageModel = query.GetPage(pageRequest);
             StateHasChanged();
         }

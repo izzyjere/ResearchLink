@@ -75,8 +75,8 @@
                                         }
 
                                     </ul>
-                               </div>
-                                
+                                </div>
+
                             }
                             @if (Model.Researches.Any())
                             {
@@ -88,18 +88,23 @@
                                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                                 <div class="me-3">
                                                     <a href="research?p=@(item.Id)" class="link-normal">@item.Title </a>
-                                                     (@GetAuthorNames(item))
-                                                </div>                                                
+                                                    (@GetAuthorNames(item))
+                                                </div>
                                             </li>
                                         }
 
                                     </ul>
                                 </div>
-                                
-                            } 
-                            <div class="col-6">
-                                <AuthorisedLink Class="btn btn-primary mt-4" Href=@($"submit?gap={Model.Id}")>Submit a reasearch</AuthorisedLink>
-                            </div>                           
+
+                            }
+                            <AuthorizeView Roles="@RoleConstants.Researcher">
+                                <Authorized>
+                                    <div class="col-6">
+                                        <AuthorisedLink Class="btn btn-primary mt-4" Href=@($"submit?gap={Model.Id}")>Submit a reasearch</AuthorisedLink>
+                                    </div>
+                                </Authorized>
+                            </AuthorizeView>
+                           
                         </div>
                     </div>
                     <div class="col-12">
@@ -336,5 +341,5 @@
         }
         return new MarkupString(stringBuilder.ToString());
     }
-       
+
 }

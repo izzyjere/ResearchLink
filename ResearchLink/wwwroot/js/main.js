@@ -2,7 +2,9 @@ function showErrorMessage(message) {
     $('#e-message').removeClass("d-none")
     $('#e-message-content').text(message)
 }
-
+function triggerInput(element) {
+	$(element).click();
+}
 function downloadFile(fileModel) {
     var link = document.createElement("a");
     link.download = fileModel.fileName;

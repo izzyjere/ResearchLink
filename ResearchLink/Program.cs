@@ -24,7 +24,7 @@ builder.Services.AddPaymentServices(options =>
     options.Title = "Research Link Payment";
     options.LogoLocation = "favicon.png";
     options.Description = "Pay to access this resource";
-    options.PublicKey = "FLWPUBK_TEST-803633b41c973f55bc42ac4fc753171f-X";
+    options.PublicKey = "KEY";
 });
 builder.Services.AddBlazorBootstrap();
 builder.Services.AddHangfire(t =>
